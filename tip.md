@@ -1,0 +1,3 @@
+- npm 설치 목록 보기
+  - $ npm ls -g
+  - $ npm ls -g --depth= 0
