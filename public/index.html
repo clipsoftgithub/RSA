@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>원격지원팀</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="stylesheets/style.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <style type="text/css">
+        img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+        }
+    </style>
+    <script type="text/javascript">
+        var domain = 'http://' + window.location.host;
+        $(document).ready(function () {
+            $('#home').attr('href', domain);
+            $('#search').attr('href', domain + '/search');
+            $.ajax({url: domain + '/rest/api/tasks/today'}).then(function (data) {
+                var tasks = JSON.parse(data);
+                var html = "";
+                for (i = 0; i < tasks.length; ++i) {
+                    var html = "";
+                    var task = tasks[i];
+                    if (task.state == "접수") {
+                        html += '<div class="col-xs-18 col-sm-6 col-md-3">';
+                        html += '<div class="thumbnail">';
+                        html += '<img src="./images/customer.png"/>';
+                        html += '<div class="caption">';
+                        html += '<h4>' + task.project + '</h4>';
+                        html += '<p>' + task.name + '</p>';
+                        html += '<p>' + task.phone + '</p>';
+                        html += '</div>';
+                        html += '</div>';
+                        html += '</div>';
+                        var content = $(html);
+                        content.appendTo('#list-in').show();
+                    } else if (task.state == "진행") {
+                        html += '<div class="col-xs-18 col-sm-6 col-md-3">';
+                        html += '<div class="thumbnail">';
+                        html += '<img src="./images/' + task.member + '.jpeg"/>';
+                        html += '<div class="caption">';
+                        html += '<h4>' + task.project + '</h4>';
+                        html += '<p>' + task.name + '</p>';
+                        html += '<p>' + task.phone + '</p>';
+                        html += '<button task= "' + task._id + '" id="button-task-' + task._id + '" type="button" class="btn btn-primary">상세 보기</button>';
+                        html += '</div>';
+                        html += '</div>';
+                        html += '</div>';
+                        var content = $(html);
+                        content.appendTo('#list-ing').show();
+                        $('#button-task-' + task._id).click(function () {
+                            id = $(this).attr("task");
+                            $(location).attr('href', domain + '/process?task=' + id);
+                        });
+                    } else {
+                        html += '<div class="col-xs-18 col-sm-6 col-md-3">';
+                        html += '<div class="thumbnail">';
+                        html += '<img title="' + task.member + '" src="./images/' + task.member + '.jpeg"/>';
+                        html += '<div class="caption">';
+                        html += '<h4>' + task.project + '</h4>';
+                        html += '<p>' + task.name + '</p>';
+                        html += '<p>' + task.phone + '</p>';
+                        html += '<button task= "' + task._id + '" id="button-task-' + task._id + '" type="button" class="btn btn-primary">상세 보기</button>';
+                        html += '</div>';
+                        html += '</div>';
+                        html += '</div>';
+                        var content = $(html);
+                        content.appendTo('#list-out').show();
+                        $('#button-task-' + task._id).click(function () {
+                            id = $(this).attr("task");
+                            $(location).attr('href', domain + '/finish?task=' + id);
+                        });
+                    }
+                }
+
+                $('#button-register').click(function () {
+                    $(location).attr('href', domain + '/register');
+                });
+
+                $('#button-assign').click(function () {
+                    $(location).attr('href', domain + '/assign');
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+<div class="container">
+    <div class="jumbotron">
+        <h2>Support Team Dashboard</h2>
+        <p>Technical support may be delivered by the different technologies depending on the situation. For example,
+            direct questions can be addressed using telephone calls, SMS, Online chat, Support Forums, E-mail or Fax;
+            basic software problems can be addressed over the telephone or, increasingly, by using remote access repair
+            services; while more complicated problems with hardware may need to be dealt with in person</p>
+    </div>
+    <div class="page-header">
+        <a id="home"><img src="./images/home.png" width="100" width="100"></a>
+        <a id="search"><img src="./images/search.png" width="100" width="100"></a>
+        <h3>클립소프트 원격지원 현황</h3>
+    </div>
+    <div class="row">
+        <ul class="nav nav-tabs">
+            <li class="active"><a data-toggle="tab" href="#register">접수</a></li>
+            <li><a data-toggle="tab" href="#assign">진행</a></li>
+            <li><a data-toggle="tab" href="#finish">완료</a></li>
+        </ul>
+
+        <div class="tab-content">
+            <div id="register" class="tab-pane fade in active">
+                <div class="form-group">
+                    <button type="button" id="button-register" class="btn btn-primary">기술지원 접수 등록 페이지로 이동</button>
+                </div>
+                <div class="row" id="list-in">
+                </div>
+            </div>
+            <div id="assign" class="tab-pane fade">
+                <div class="form-group">
+                    <button type="button" id="button-assign" class="btn btn-primary">기술지원 인력 할당 페이지로 이동</button>
+                </div>
+                <div class="row" id="list-ing">
+                </div>
+            </div>
+            <div id="finish" class="tab-pane fade">
+                <div class="row" id="list-out">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</body>
+</html>

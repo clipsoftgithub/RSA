@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>원격지원팀</title>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="stylesheets/style.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+        var domain = 'http://' + window.location.host;
+        $(document).ready(function () {
+            $('#home').attr('href', domain);
+            $.ajax({url: domain + '/rest/api/tasks/state/accept'}).then(function (data) {
+                var tasks = JSON.parse(data);
+                var html = "";
+                for (i = 0; i < tasks.length; ++i) {
+                    var html = "";
+                    var task = tasks[i];
+                    html += '<div id="task-card-' + task._id + '" class="col-xs-18 col-sm-6 col-md-3">';
+                    html += '<div class="thumbnail">';
+                    html += '<img src="./images/customer.png" width="80" height="80"/>';
+                    html += '<div class="caption">';
+                    html += '<h4>' + task.project + '</h4>';
+                    html += '<p>' + task.name + '</p>';
+                    html += '<p>' + task.phone + '</p>';
+                    html += '<div class="form-group">';
+                    html += '<select id="task-member-' + task._id + '" class="form-control">';
+                    html += '<option value="김숙정">김숙정</option>';
+                    html += '<option value="신종진">신종진</option>';
+                    html += '<option value="박소희">박소희</option>';
+                    html += '</select>';
+                    html += '</div>';
+                    html += '<button task= "' + task._id + '" id="task-' + task._id + '" type="button" class="btn btn-primary">기술지원 시작</button>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '</div>';
+                    var content = $(html);
+                    content.appendTo('#list-in').show();
+                    $('#task-' + task._id).click(function () {
+                        id = $(this).attr("task");
+                        member = $('#task-member-' + id).val();
+                        $(location).attr('href', domain + '/process?task=' + id + '&member=' + member);
+                    });
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+<div class="container">
+    <div class="jumbotron">
+        <h2>Support Team Dashboard</h2>
+        <p>Technical support may be delivered by the different technologies depending on the situation. For example,
+            direct questions can be addressed using telephone calls, SMS, Online chat, Support Forums, E-mail or Fax;
+            basic software problems can be addressed over the telephone or, increasingly, by using remote access repair
+            services; while more complicated problems with hardware may need to be dealt with in person</p>
+    </div>
+    <div class="page-header">
+        <a id="home"><img src="./images/home.png" width="100" width="100"></a>
+        <h3>클립소프트 원격지원 인력 할당</h3>
+    </div>
+    <div class="row">
+        <ul class="nav nav-tabs">
+            <li class="active"><a data-toggle="tab" href="#home">접수</a></li>
+        </ul>
+
+        <div class="tab-content">
+            <div id="home" class="tab-pane fade in active">
+                <div class="row" id="list-in">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+</body>
+</html>

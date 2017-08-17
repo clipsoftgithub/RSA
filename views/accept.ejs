@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>원격지원 상세 내용</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="stylesheets/style.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+        var domain = 'http://' + window.location.host;
+        $(document).ready(function () {
+            $('#product option').each(function() {
+                if($(this).val() == '<%=task.product%>') {
+                    $(this).prop("selected", true);
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+<div class="container">
+    <div class="jumbotron">
+        <h2>Support Team Dashboard</h2>
+        <p>Technical support may be delivered by the different technologies depending on the situation. For example,
+            direct questions can be addressed using telephone calls, SMS, Online chat, Support Forums, E-mail or Fax;
+            basic software problems can be addressed over the telephone or, increasingly, by using remote access repair
+            services; while more complicated problems with hardware may need to be dealt with in person</p>
+    </div>
+    <div class="page-header">
+        <div class="row">
+            <div class="col-sm-1">
+                <img src="./images/<%=task.member%>.jpeg" width="80" width="80" style="border-radius: 50%"/>
+            </div>
+            <div class="col-sm-11">
+                <h3><%=task.member%> 기술지원 완료</h3>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <form>
+            <div class="form-group">
+                <label>회사명</label>
+                <input type="text" class="form-control" id="company" disabled="true" value="<%=task.company%>"/>
+            </div>
+            <div class="form-group">
+                <label>프로젝트명</label>
+                <input type="text" class="form-control" id="project" disabled="true" value="<%=task.project%>"/>
+            </div>
+            <div class="form-group">
+                <label>이름</label>
+                <input type="text" class="form-control" id="name" disabled="true" value="<%=task.name%>"/>
+            </div>
+            <div class="form-group">
+                <label>연락처</label>
+                <input type="text" class="form-control" id="phone" disabled="true" value="<%=task.phone%>"/>
+            </div>
+            <div class="form-group">
+                <label>제품</label>
+                <select class="form-control" id="product" disabled="true">
+                    <option>렉스퍼트 2.0</option>
+                    <option>렉스퍼트 2.5</option>
+                    <option>렉스퍼트 3.0</option>
+                    <option>클립리포트 4.0</option>
+                    <option>웹이폼</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>문의 내용</label>
+                <textarea class="form-control" id="question" rows="3" disabled="true"><%=task.question%></textarea>
+            </div>
+            <div class="form-group">
+                <label>기술지원 내용</label>
+                <textarea class="form-control" id="result" rows="6" disabled="true" ><%=task.result%></textarea>
+            </div>
+        </form>
+    </div>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>원격지원팀</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="stylesheets/style.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+        var domain = 'http://' + window.location.host;
+        $(document).ready(function () {
+            $('#home').attr('href', domain);
+            $('#phone').focusout(function () {
+                var phone = $('#phone').val();
+                if (phone === "" || phone == undefined)
+                    return;
+                phone = phone.replace(/ /g, '-');
+                $.ajax({
+                    type: "GET",
+                    url: '/rest/api/tasks/search/phone/' + phone,
+                    success: function (data) {
+                        var record = JSON.parse(data);
+                        $('#name').val(record.name);
+                        $('#company').val(record.company);
+                        $('#project').val(record.project);
+                    }
+                });
+
+                $.ajax({
+                    type: "GET",
+                    url: '/rest/api/tasks/search/recent/phone/' + phone,
+                    success: function (data) {
+                        var record = JSON.parse(data);
+                        $('#recent-create').val(record.create);
+                        $('#recent-member').val(record.member);
+                        $('#recent-question').val(record.question);
+                        $('#recent-result').val(record.result);
+                    }
+                });
+            });
+
+            $("#button-register").click(function () {
+                var record = {};
+                record.company = $("#company").val();
+                record.project = $("#project").val();
+                record.name = $("#name").val();
+                record.phone = $("#phone").val();
+                record.product = $("#product").val();
+                record.question = $("#question").val();
+
+                if (record.phone === "") {
+                    alert("연락처는 필수 항목입니다.");
+                    return;
+                }
+
+                if (record.name === "") {
+                    alert("이름은 필수 항목입니다.");
+                    return;
+                }
+
+                if (record.company === "") {
+                    alert("회사명은 필수 항목입니다.");
+                    return;
+                }
+
+                $.post(domain + '/rest/api/tasks/register', record, function (data) {
+                    if (data === "ok") {
+                        $(location).attr('href', domain + '/assign');
+                    }
+                });
+            });
+
+        });
+    </script>
+</head>
+<body>
+<div class="container">
+    <div class="jumbotron">
+        <h2>Support Team Dashboard</h2>
+        <p>Technical support may be delivered by the different technologies depending on the situation. For example,
+            direct questions can be addressed using telephone calls, SMS, Online chat, Support Forums, E-mail or Fax;
+            basic software problems can be addressed over the telephone or, increasingly, by using remote access repair
+            services; while more complicated problems with hardware may need to be dealt with in person</p>
+    </div>
+    <div class="page-header">
+        <!-- https://www.iconfinder.com/icons/197589/circular_home_index_main_mainpage_modern_red_icon#size=128 -->
+        <a id="home"><img src="./images/home512x512.png" width="100" width="100"></a>
+        <h3>클립소프트 원격지원 접수</h3>
+    </div>
+    <div class="row">
+        <form>
+            <div class="form-group">
+                <label>연락처(필수)</label>
+                <input type="text" class="form-control" id="phone" placeholder="010-1234-1234">
+                <small class="form-text text-muted">* 연락처를 적습니다.</small>
+            </div>
+            <div class="form-group">
+                <label>이름(필수)</label>
+                <input type="text" class="form-control" id="name" placeholder="홍길동">
+                <small class="form-text text-muted">* 기술 문의 주신분 이름을 적습니다.</small>
+            </div>
+            <div class="form-group">
+                <label>회사명(필수)</label>
+                <input type="text" class="form-control" id="company" placeholder="회사명(클립소프트)">
+                <small class="form-text text-muted">* 회사명을 정확히 기입해주세요</small>
+            </div>
+            <div class="form-group">
+                <label>프로젝트명</label>
+                <input type="text" class="form-control" id="project" placeholder="프로젝트명(고도화사업)">
+                <small class="form-text text-muted">* 프로젝트명을 정확히 기입해주세요. 모르면 그냥 빈칸으로 남겨두세요.</small>
+            </div>
+            <div class="form-group">
+                <label>제품</label>
+                <select class="form-control" id="product">
+                    <option>렉스퍼트 2.0</option>
+                    <option>렉스퍼트 2.5</option>
+                    <option>렉스퍼트 3.0</option>
+                    <option selected>클립리포트 4.0</option>
+                    <option>웹이폼</option>
+                </select>
+                <small class="form-text text-muted">*</small>
+            </div>
+            <div class="form-group">
+                <div class="panel-group" id="accordion">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo"><span
+                                        class="glyphicon glyphicon-th-list">
+                                </span> 최근 기술지원 이력</a>
+                            </h4>
+                        </div>
+                        <div id="collapseTwo" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="recent-create"
+                                                   placeholder="기술지원날짜" disabled="true"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="recent-member"
+                                                   placeholder="기술지원한사람" disabled="true"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <textarea class="form-control" id="recent-question" rows="4"
+                                                      placeholder="문의내용" disabled="true"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <textarea class="form-control" id="recent-result" rows="4"
+                                                      placeholder="기술지원내용" disabled="true"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>문의 내용</label>
+                <textarea class="form-control" id="question" rows="4"
+                          placeholder="큰일 났어요! 리포트에서 불이 나고 있어요. 도와주세요."></textarea>
+                <small class="form-text text-muted">* 가능하면 정확히 입력해주세요. 가끔 똑같은 내용 여러번 이야기 한다고 짜증내는 분들이 계십니다.</small>
+            </div>
+            <button type="button" id="button-register" class="btn btn-primary">접수</button>
+        </form>
+    </div>
+</div>
+</div>
+
+</body>
+</html>

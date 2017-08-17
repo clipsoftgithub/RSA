@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>클립소프트 원격지원팀 이력 조회</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid.min.css">
+    <link rel="stylesheet" href=" https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid-theme.min.css">
+    <link rel="stylesheet" href="stylesheets/style.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+        var domain = 'http://' + window.location.host;
+        $(document).ready(function () {
+            function search(query, grid_id) {
+                $.ajax({url: domain + '/rest/api/tasks/search', data: query, dataType: "json"}).then(function (result) {
+                    $(grid_id).jsGrid({
+                        width: "100%",
+                        height: "100%",
+                        filtering: false,
+                        inserting: false,
+                        editing: false,
+                        sorting: true,
+                        paging: true,
+                        data: result.records,
+                        fields: [
+                            {type: "control"},
+                            {name: "create", type: "text", title: "접수일자", width: 150},
+                            {name: "company", type: "text", title: "회사", width: 100},
+                            {name: "project", type: "text", title: "프로젝트", width: 100},
+                            {name: "name", type: "text", title: "고객이름", width: 100},
+                            {name: "phone", type: "text", title: "전화번호", width: 100},
+                            {name: "product", type: "text", title: "제품", width: 100},
+                            {name: "question", type: "text", title: "질문", width: 100},
+                            {name: "member", type: "text", title: "원격지원 담당자", width: 100},
+                            {name: "method", type: "text", title: "방법", width: 100},
+                            {name: "btime", type: "text", title: "시작시간", width: 100},
+                            {name: "etime", type: "text", title: "마친시간", width: 100},
+                            {name: "state", type: "text", title: "상태", width: 100}
+                        ]
+                    });
+                });
+            }
+
+            // 회사로 검색하는 경우
+            $('#tab-company #search').click(function () {
+                var company = $('#company').val();
+                var start = $('#tab-company #start').val();
+                var end = $('#tab-company #end').val();
+                if (company == "" || company == undefined) {
+                    $('#company').closest('.form-group').removeClass('has-success').addClass('has-error');
+                    return;
+                }
+                var query = {};
+                query.company = company;
+                query.start = start;
+                query.end = end;
+                search(query, '#tab-company #grid');
+            });
+
+            // 프로젝트로 검색하는 경우
+            $('#tab-project #search').click(function () {
+                var project = $('#project').val();
+                var start = $('#tab-project #start').val();
+                var end = $('#tab-project #end').val();
+                if (project == "" || project == undefined) {
+                    $('#project').closest('.form-group').removeClass('has-success').addClass('has-error');
+                    return;
+                }
+                var query = {};
+                query.project = project;
+                query.start = start;
+                query.end = end;
+                search(query, '#tab-project #grid');
+            });
+
+            // 이름으로 검색하는 경우
+            $('#tab-name #search').click(function () {
+                var name = $('#name').val();
+                var start = $('#tab-name #start').val();
+                var end = $('#tab-name #end').val();
+                if (name == "" || name == undefined) {
+                    $('#name').closest('.form-group').removeClass('has-success').addClass('has-error');
+                    return;
+                }
+                var query = {};
+                query.name = name;
+                query.start = start;
+                query.end = end;
+
+                search(query, '#tab-name #grid');
+            });
+
+            // 연락처로 검색하는 경우
+            $('#tab-phone #search').click(function () {
+                var phone = $('#phone').val();
+                var start = $('#tab-phone #start').val();
+                var end = $('#tab-phone #end').val();
+                if (phone == "" || phone == undefined) {
+                    $('#phone').closest('.form-group').removeClass('has-success').addClass('has-error');
+                    return;
+                }
+                var query = {};
+                query.phone = phone;
+                query.start = start;
+                query.end = end;
+                search(query, '#tab-phone #grid');
+            });
+
+            // 제품명으로 검색하는 경우
+            $('#tab-product #search').click(function () {
+                var product = $('#product').val();
+                var start = $('#tab-product #start').val();
+                var end = $('#tab-product #end').val();
+                if (product == "" || product == undefined) {
+                    $('#product').closest('.form-group').removeClass('has-success').addClass('has-error');
+                    return;
+                }
+                var query = {};
+                query.product = product;
+                query.start = start;
+                query.end = end;
+                search(query, '#tab-product #grid');
+            });
+
+            // 담당자로 검색하는 경우
+            $('#tab-member #search').click(function () {
+                var member = $('#member').val();
+                var start = $('#tab-member #start').val();
+                var end = $('#tab-member #end').val();
+                if (member == "" || member == undefined) {
+                    $('#member').closest('.form-group').removeClass('has-success').addClass('has-error');
+                    return;
+                }
+                var query = {};
+                query.member = member;
+                query.start = start;
+                query.end = end;
+                search(query, '#tab-member #grid');
+            });
+        });
+    </script>
+</head>
+<body>
+<div class="container">
+    <div class="jumbotron">
+        <h2>Support Team Dashboard</h2>
+        <p>Technical support may be delivered by the different technologies depending on the situation. For example,
+            direct questions can be addressed using telephone calls, SMS, Online chat, Support Forums, E-mail or Fax;
+            basic software problems can be addressed over the telephone or, increasingly, by using remote access repair
+            services; while more complicated problems with hardware may need to be dealt with in person</p>
+    </div>
+    <div class="page-header">
+        <img src="./images/home.png" width="100" width="100">
+        <h3>클립소프트 원격지원 이력 조회</h3>
+    </div>
+    <div class="row">
+        <ul class="nav nav-tabs">
+            <li class="active"><a data-toggle="tab" href="#tab-company">회사</a></li>
+            <li><a data-toggle="tab" href="#tab-project">프로젝트</a></li>
+            <li><a data-toggle="tab" href="#tab-name">이름</a></li>
+            <li><a data-toggle="tab" href="#tab-phone">연락처</a></li>
+            <li><a data-toggle="tab" href="#tab-product">제품</a></li>
+            <li><a data-toggle="tab" href="#tab-member">지원담당자</a></li>
+        </ul>
+
+        <div class="tab-content">
+            <!-- 회사로 조회 -->
+            <div id="tab-company" class="tab-pane fade in active">
+                <div class="container">
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <label>시작</label>
+                            <input type="date" data-date="" data-date-format="YYYY-MM-DD" class="form-control"
+                                   id="start" placeholder="조회 시작 날짜(2017-01-01)를 입력해주세요.">
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label>종료</label>
+                            <input type="date" data-date="" data-date-format="YYYY-MM-DD" class="form-control" id="end"
+                                   placeholder="조회 종료 날짜(2017-01-01)를 입력해주세요.">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <label>회사명</label>
+                            <input type="text" class="form-control" id="company" placeholder="회사명(클립소프트)을 입력해주세요.">
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label>&nbsp;</label>
+                            <button type="button" id="search" class="form-control btn btn-primary">조회
+                            </button>
+                        </div>
+                    </div>
+                    <div id="grid" class="row">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 프로젝트로 조회 -->
+            <div id="tab-project" class="tab-pane fade">
+                <div class="container">
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <label>시작</label>
+                            <input type="date" data-date="" data-date-format="YYYY-MM-DD" class="form-control"
+                                   id="start" placeholder="조회 시작 날짜(2017-01-01)를 입력해주세요.">
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label>종료</label>
+                            <input type="date" data-date="" data-date-format="YYYY-MM-DD" class="form-control" id="end"
+                                   placeholder="조회 종료 날짜(2017-01-01)를 입력해주세요.">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <label>프로젝트</label>
+                            <input type="text" class="form-control" id="project" placeholder="프로젝트 이름을 입력해주세요.">
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label>&nbsp;</label>
+                            <button type="button" id="search" class="form-control btn btn-primary">조회
+                            </button>
+                        </div>
+                    </div>
+                    <div id="grid" class="row">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 이름으로 조회 -->
+            <div id="tab-name" class="tab-pane fade">
+                <div class="container">
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <label>시작</label>
+                            <input type="date" data-date="" data-date-format="YYYY-MM-DD" class="form-control"
+                                   id="start" placeholder="조회 시작 날짜(2017-01-01)를 입력해주세요.">
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label>종료</label>
+                            <input type="date" data-date="" data-date-format="YYYY-MM-DD" class="form-control" id="end"
+                                   placeholder="조회 종료 날짜(2017-01-01)를 입력해주세요.">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <label>이름</label>
+                            <input type="text" class="form-control" id="name" placeholder="이름을 입력해주세요">
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label>&nbsp;</label>
+                            <button type="button" id="search" class="form-control btn btn-primary">조회
+                            </button>
+                        </div>
+                    </div>
+                    <div id="grid" class="row">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 연락처로 조회 -->
+            <div id="tab-phone" class="tab-pane fade">
+                <div class="container">
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <label>시작</label>
+                            <input type="date" data-date="" data-date-format="YYYY-MM-DD" class="form-control"
+                                   id="start" placeholder="조회 시작 날짜(2017-01-01)를 입력해주세요.">
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label>종료</label>
+                            <input type="date" data-date="" data-date-format="YYYY-MM-DD" class="form-control" id="end"
+                                   placeholder="조회 종료 날짜(2017-01-01)를 입력해주세요.">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <label>연락처</label>
+                            <input type="text" class="form-control" id="phone" placeholder="연락처를 입력해주세요">
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label>&nbsp;</label>
+                            <button type="button" id="search" class="form-control btn btn-primary">조회
+                            </button>
+                        </div>
+                    </div>
+                    <div id="grid" class="row">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 제품으로 조회 -->
+            <div id="tab-product" class="tab-pane fade">
+                <div class="container">
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <label>시작</label>
+                            <input type="date" data-date="" data-date-format="YYYY-MM-DD" class="form-control"
+                                   id="start" placeholder="조회 시작 날짜(2017-01-01)를 입력해주세요.">
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label>종료</label>
+                            <input type="date" data-date="" data-date-format="YYYY-MM-DD" class="form-control" id="end"
+                                   placeholder="조회 종료 날짜(2017-01-01)를 입력해주세요.">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <label>제품명</label>
+                            <input type="text" class="form-control" id="product" placeholder="제품명을 입력해주세요">
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label>&nbsp;</label>
+                            <button type="button" id="search" class="form-control btn btn-primary">조회
+                            </button>
+                        </div>
+                    </div>
+                    <div id="grid" class="row">
+                    </div>
+                </div>
+            </div>
+            <!-- 지원 담당자로 조회 -->
+            <div id="tab-member" class="tab-pane fade">
+                <div class="container">
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <label>시작</label>
+                            <input type="date" data-date="" data-date-format="YYYY-MM-DD" class="form-control"
+                                   id="start" placeholder="조회 시작 날짜(2017-01-01)를 입력해주세요.">
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label>종료</label>
+                            <input type="date" data-date="" data-date-format="YYYY-MM-DD" class="form-control" id="end"
+                                   placeholder="조회 종료 날짜(2017-01-01)를 입력해주세요.">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <label>담당자</label>
+                            <input type="text" class="form-control" id="member" placeholder="담당자(박소희)을 입력해주세요">
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label>&nbsp;</label>
+                            <button type="button" id="search" class="form-control btn btn-primary">조회
+                            </button>
+                        </div>
+                    </div>
+                    <div id="grid" class="row">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+</body>
+</html>
