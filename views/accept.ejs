@@ -10,8 +10,20 @@
     <script type="text/javascript">
         var domain = 'http://' + window.location.host;
         $(document).ready(function () {
+            $('#usertype option').each(function() {
+                if($(this).val() == '<%=task.usertype%>') {
+                    $(this).prop("selected", true);
+                }
+            });
+
             $('#product option').each(function() {
                 if($(this).val() == '<%=task.product%>') {
+                    $(this).prop("selected", true);
+                }
+            });
+
+            $('#productdetail option').each(function() {
+                if($(this).val() == '<%=task.productdetail%>') {
                     $(this).prop("selected", true);
                 }
             });
@@ -44,6 +56,13 @@
                 <input type="text" class="form-control" id="company" disabled="true" value="<%=task.company%>"/>
             </div>
             <div class="form-group">
+                <label>사용자 유형</label>
+                <select class="form-control" id="usertype">
+                    <option selected>일반사용자</option>
+                    <option>개발자</option>
+                </select>
+            </div>
+            <div class="form-group">
                 <label>프로젝트명</label>
                 <input type="text" class="form-control" id="project" disabled="true" value="<%=task.project%>"/>
             </div>
@@ -62,7 +81,17 @@
                     <option>렉스퍼트 2.5</option>
                     <option>렉스퍼트 3.0</option>
                     <option>클립리포트 4.0</option>
+                    <option>클립리포트 4.0 데몬</option>
                     <option>웹이폼</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>제품 상세 분류</label>
+                <select class="form-control" id="productdetail">
+                    <option selected>서버</option>
+                    <option>디자이너</option>
+                    <option>뷰어</option>
+                    <option>기타</option>
                 </select>
             </div>
             <div class="form-group">

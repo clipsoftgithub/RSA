@@ -8,7 +8,8 @@
     <link rel="stylesheet" href="stylesheets/style.css">
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.10/handlebars.min.js"></script>
+
     <style type="text/css">
         img {
             width: 80px;
@@ -16,68 +17,84 @@
             border-radius: 50%;
         }
     </style>
+
+    <script id="accept-template" type="text/x-handlebars-template">
+        <div class="col-xs-18 col-sm-6 col-md-3">
+            <div class="thumbnail">
+                <img src="./images/customer.png"/>
+                <div class="caption">
+                    <h4>{{project}}</h4>
+                    <p>{{name}}</p>
+                    <p>{{phone}}</p>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <script id="process-template" type="text/x-handlebars-template">
+        <div class="col-xs-18 col-sm-6 col-md-3">
+            <div class="thumbnail">
+                <img title="{{member}}" src="./images/{{member}}.jpeg"/>
+                <div class="caption">
+                    <h4>{{project}}</h4>
+                    <p>{{name}}</p>
+                    <p>{{phone}}</p>
+                    <button task="{{_id}}" id="button-process" type="button" class="btn btn-primary">상세 보기</button>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <script id="finish-template" type="text/x-handlebars-template">
+        <div class="col-xs-18 col-sm-6 col-md-3">
+            <div class="thumbnail">
+                <img title="{{member}}" src="./images/{{member}}.jpeg"/>
+                <div class="caption">
+                    <h4>{{project}}</h4>
+                    <p>{{name}}</p>
+                    <p>{{phone}}</p>
+                    <button task="{{_id}}" id="button-finish" type="button" class="btn btn-primary">상세 보기</button>
+                </div>
+            </div>
+        </div>
+    </script>
+
     <script type="text/javascript">
         var domain = 'http://' + window.location.host;
+        function template(id, task) {
+            var s = $(id).html();
+            var t = Handlebars.compile(s);
+            return $(t(task));
+        }
+
         $(document).ready(function () {
             $('#home').attr('href', domain);
             $('#search').attr('href', domain + '/search');
+
             $.ajax({url: domain + '/rest/api/tasks/today'}).then(function (data) {
                 var tasks = JSON.parse(data);
-                var html = "";
                 for (i = 0; i < tasks.length; ++i) {
-                    var html = "";
                     var task = tasks[i];
-                    if (task.state == "접수") {
-                        html += '<div class="col-xs-18 col-sm-6 col-md-3">';
-                        html += '<div class="thumbnail">';
-                        html += '<img src="./images/customer.png"/>';
-                        html += '<div class="caption">';
-                        html += '<h4>' + task.project + '</h4>';
-                        html += '<p>' + task.name + '</p>';
-                        html += '<p>' + task.phone + '</p>';
-                        html += '</div>';
-                        html += '</div>';
-                        html += '</div>';
-                        var content = $(html);
-                        content.appendTo('#list-in').show();
-                    } else if (task.state == "진행") {
-                        html += '<div class="col-xs-18 col-sm-6 col-md-3">';
-                        html += '<div class="thumbnail">';
-                        html += '<img src="./images/' + task.member + '.jpeg"/>';
-                        html += '<div class="caption">';
-                        html += '<h4>' + task.project + '</h4>';
-                        html += '<p>' + task.name + '</p>';
-                        html += '<p>' + task.phone + '</p>';
-                        html += '<button task= "' + task._id + '" id="button-task-' + task._id + '" type="button" class="btn btn-primary">상세 보기</button>';
-                        html += '</div>';
-                        html += '</div>';
-                        html += '</div>';
-                        var content = $(html);
-                        content.appendTo('#list-ing').show();
-                        $('#button-task-' + task._id).click(function () {
-                            id = $(this).attr("task");
-                            $(location).attr('href', domain + '/process?task=' + id);
-                        });
-                    } else {
-                        html += '<div class="col-xs-18 col-sm-6 col-md-3">';
-                        html += '<div class="thumbnail">';
-                        html += '<img title="' + task.member + '" src="./images/' + task.member + '.jpeg"/>';
-                        html += '<div class="caption">';
-                        html += '<h4>' + task.project + '</h4>';
-                        html += '<p>' + task.name + '</p>';
-                        html += '<p>' + task.phone + '</p>';
-                        html += '<button task= "' + task._id + '" id="button-task-' + task._id + '" type="button" class="btn btn-primary">상세 보기</button>';
-                        html += '</div>';
-                        html += '</div>';
-                        html += '</div>';
-                        var content = $(html);
-                        content.appendTo('#list-out').show();
-                        $('#button-task-' + task._id).click(function () {
-                            id = $(this).attr("task");
-                            $(location).attr('href', domain + '/finish?task=' + id);
-                        });
-                    }
+                    if (task.state == "접수")
+                        template("#accept-template", task).appendTo('#list-accept').show();
+                    else if (task.state == "진행")
+                        template("#process-template", task).appendTo('#list-process').show();
+                    else
+                        template("#finish-template", task).appendTo('#list-finish').show();
                 }
+
+
+                // 동일한 아이디를 선택하기 위해 속성 선택자를 사용한다
+                $('[id="button-process"]').click(function () {
+                    id = $(this).attr("task");
+                    $(location).attr('href', domain + '/process?task=' + id);
+                });
+
+                // 동일한 아이디를 선택하기 위해 속성 선택자를 사용한다
+                $('[id="button-finish"]').click(function () {
+                    id = $(this).attr("task");
+                    $(location).attr('href', domain + '/finish?task=' + id);
+                });
 
                 $('#button-register').click(function () {
                     $(location).attr('href', domain + '/register');
@@ -116,18 +133,18 @@
                 <div class="form-group">
                     <button type="button" id="button-register" class="btn btn-primary">기술지원 접수 등록 페이지로 이동</button>
                 </div>
-                <div class="row" id="list-in">
+                <div class="row" id="list-accept">
                 </div>
             </div>
             <div id="assign" class="tab-pane fade">
                 <div class="form-group">
                     <button type="button" id="button-assign" class="btn btn-primary">기술지원 인력 할당 페이지로 이동</button>
                 </div>
-                <div class="row" id="list-ing">
+                <div class="row" id="list-process">
                 </div>
             </div>
             <div id="finish" class="tab-pane fade">
-                <div class="row" id="list-out">
+                <div class="row" id="list-finish">
                 </div>
             </div>
         </div>

@@ -45,3 +45,11 @@ me     8531  0.0  0.0  15944   944 pts/27   S+   14:14   0:00 grep --color=auto 
 
 $ ps kill 8066
 ```
+
+## mongodb
+```bash
+
+ $ service mongod stop
+ $ service mongod start
+
+```

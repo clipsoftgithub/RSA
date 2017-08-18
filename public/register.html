@@ -42,20 +42,17 @@
 
             $("#button-register").click(function () {
                 var record = {};
+                record.phone = $("#phone").val();
+                record.usertype = $("#usertype").val();
                 record.company = $("#company").val();
                 record.project = $("#project").val();
                 record.name = $("#name").val();
-                record.phone = $("#phone").val();
                 record.product = $("#product").val();
+                record.productdetail = $("#productdetail").val();
                 record.question = $("#question").val();
 
                 if (record.phone === "") {
                     alert("연락처는 필수 항목입니다.");
-                    return;
-                }
-
-                if (record.name === "") {
-                    alert("이름은 필수 항목입니다.");
                     return;
                 }
 
@@ -64,6 +61,14 @@
                     return;
                 }
 
+                if (record.name === "")
+                    record.name = "익명사용자"
+
+                if (record.project === "")
+                    record.project = "익명프로젝트";
+
+                // 010 123 1234 -> 010-123-1234
+                record.phone = record.phone.replace(/ /g, '-');
                 $.post(domain + '/rest/api/tasks/register', record, function (data) {
                     if (data === "ok") {
                         $(location).attr('href', domain + '/assign');
@@ -84,8 +89,7 @@
             services; while more complicated problems with hardware may need to be dealt with in person</p>
     </div>
     <div class="page-header">
-        <!-- https://www.iconfinder.com/icons/197589/circular_home_index_main_mainpage_modern_red_icon#size=128 -->
-        <a id="home"><img src="./images/home512x512.png" width="100" width="100"></a>
+        <a id="home"><img src="./images/home.png" width="100" width="100"></a>
         <h3>클립소프트 원격지원 접수</h3>
     </div>
     <div class="row">
@@ -96,7 +100,15 @@
                 <small class="form-text text-muted">* 연락처를 적습니다.</small>
             </div>
             <div class="form-group">
-                <label>이름(필수)</label>
+                <label>사용자 유형</label>
+                <select class="form-control" id="usertype">
+                    <option selected>일반사용자</option>
+                    <option>개발자</option>
+                </select>
+                <small class="form-text text-muted">* 사용자 타입을 설정합니다.</small>
+            </div>
+            <div class="form-group">
+                <label>이름</label>
                 <input type="text" class="form-control" id="name" placeholder="홍길동">
                 <small class="form-text text-muted">* 기술 문의 주신분 이름을 적습니다.</small>
             </div>
@@ -117,10 +129,22 @@
                     <option>렉스퍼트 2.5</option>
                     <option>렉스퍼트 3.0</option>
                     <option selected>클립리포트 4.0</option>
+                    <option>클립리포트 4.0 데몬</option>
                     <option>웹이폼</option>
                 </select>
-                <small class="form-text text-muted">*</small>
+                <small class="form-text text-muted">* 제품을 선택해주세요.</small>
             </div>
+            <div class="form-group">
+                <label>제품 상세 분류</label>
+                <select class="form-control" id="productdetail">
+                    <option selected>서버</option>
+                    <option>디자이너</option>
+                    <option>뷰어</option>
+                    <option>기타</option>
+                </select>
+                <small class="form-text text-muted">* 제품 상세 분류을 선택해주세요.</small>
+            </div>
+
             <div class="form-group">
                 <div class="panel-group" id="accordion">
                     <div class="panel panel-default">
