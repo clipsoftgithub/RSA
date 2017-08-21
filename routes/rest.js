@@ -14,8 +14,8 @@ function applyTimezoneOffset(date) {
  * 오늘 날짜 원격지원 작업을 리턴하는 함수. 여기서 오늘 날짜는 서버 날짜를 기준으로 함.
  */
 router.get('/api/tasks/today', function (req, res) {
-    var start = new Date();
-    var end = new Date();
+    var start = applyTimezoneOffset(new Date());
+    var end = applyTimezoneOffset(new Date());
     start.setHours(0, 0, 0, 0);
     end.setHours(23, 59, 59, 999);
     db.get().collection(collectionName).find({create: {$gte: start, $lt: end}}).toArray(function (err, docs) {
