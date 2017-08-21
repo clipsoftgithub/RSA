@@ -26,6 +26,7 @@
                     <h4>{{project}}</h4>
                     <p>{{name}}</p>
                     <p>{{phone}}</p>
+                    <button task="{{_id}}" id="button-delete" type="button" class="btn btn-danger">접수 삭제</button>
                 </div>
             </div>
         </div>
@@ -94,6 +95,18 @@
                 $('[id="button-finish"]').click(function () {
                     id = $(this).attr("task");
                     $(location).attr('href', domain + '/finish?task=' + id);
+                });
+
+                $('[id="button-delete"]').click(function () {
+                    var id = $(this).attr('task');
+                    $.ajax({url:domain + '/rest/api/tasks/' + id, type:'DELETE'}).then(function(data){
+                        if(data == "ok") {
+                            alert('삭제 성공');
+                            $(location).attr('href', domain);
+                        } else {
+                            alert('삭제 실패 - 관리자에게');
+                        }
+                    });
                 });
 
                 $('#button-register').click(function () {

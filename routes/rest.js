@@ -4,6 +4,15 @@ var router = express.Router();
 var ObjectID = require('mongodb').ObjectID;
 var collectionName = 'support_team';
 
+
+function applyTimezoneOffset(date) {
+    date.setHours((date.getHours() - date.getTimezoneOffset() / 60));
+    return date;
+}
+
+/**
+ * 오늘 날짜 원격지원 작업을 리턴하는 함수. 여기서 오늘 날짜는 서버 날짜를 기준으로 함.
+ */
 router.get('/api/tasks/today', function (req, res) {
     var start = new Date();
     var end = new Date();
@@ -19,9 +28,11 @@ router.get('/api/tasks/today', function (req, res) {
 });
 
 
-
+/**
+ * "접수" 상태에 있는 모든 원격지원 작업을 리턴하는 함수.
+ */
 router.get('/api/tasks/state/accept', function (req, res) {
-    db.get().collection(collectionName).find({state : "접수"}).toArray(function (err, docs) {
+    db.get().collection(collectionName).find({state: "접수"}).toArray(function (err, docs) {
         if (err) {
             console.log(err);
         } else {
@@ -30,8 +41,11 @@ router.get('/api/tasks/state/accept', function (req, res) {
     });
 });
 
+/**
+ * "진행" 상태에 있는 모든 원격지원 작업을 리턴하는 함수
+ */
 router.get('/api/tasks/state/process', function (req, res) {
-    db.get().collection(collectionName).find({state : "진행"}).toArray(function (err, docs) {
+    db.get().collection(collectionName).find({state: "진행"}).toArray(function (err, docs) {
         if (err) {
             console.log(err);
         } else {
@@ -40,9 +54,11 @@ router.get('/api/tasks/state/process', function (req, res) {
     });
 });
 
-
+/**
+ * "완료" 상태에 있는 모든 원격지원 작업을 리턴하는 함수.
+ */
 router.get('/api/tasks/state/finish', function (req, res) {
-    db.get().collection(collectionName).find({state : "완료"}).toArray(function (err, docs) {
+    db.get().collection(collectionName).find({state: "완료"}).toArray(function (err, docs) {
         if (err) {
             console.log(err);
         } else {
@@ -53,15 +69,15 @@ router.get('/api/tasks/state/finish', function (req, res) {
 
 
 /**
- * 원격지원팀에서 전화가 오면 접수 등록하는 함수.
+ * 원격지원 작업을 등록하는 함수. 원격지원 작업의 초기 상태는 "접수"가 됨.
  */
 router.post('/api/tasks/register', function (req, res) {
     var record = req.body;
-    record.create = new Date();
+    record.create = applyTimezoneOffset(new Date());
     record.member = "";
     record.method = "";
-    record.btime = "";
-    record.etime = "";
+    record.btime = new Date();
+    record.etime = new Date();
     record.state = "접수";
     console.log(record);
     db.get().collection(collectionName).insert(record);
@@ -69,6 +85,20 @@ router.post('/api/tasks/register', function (req, res) {
 });
 
 
+router.delete('/api/tasks/:id', function (req, res) {
+    console.log(req.params.id);
+    db.get().collection(collectionName).remove({_id: new ObjectID(req.params.id)}, function(err, records) {
+        if (err) {
+            console.log(err);
+        }
+    });
+    res.send("ok");
+});
+
+
+/**
+ * 원격지원 작업을 검색하는 함수.
+ */
 router.get('/api/tasks/search', function (req, res) {
     var query = req.query;
     console.log(query);
@@ -102,7 +132,9 @@ router.get('/api/tasks/search', function (req, res) {
     });
 });
 
-
+/**
+ * 전화번호로 원격지원 작업을 검색하는 헬프 함수 - 작업 등록(register.html)에서 사용함.
+ */
 router.get('/api/tasks/search/phone/:id', function (req, res) {
     console.log(req.params.id);
     var phone = req.params.id;
@@ -115,6 +147,9 @@ router.get('/api/tasks/search/phone/:id', function (req, res) {
     });
 });
 
+/**
+ * 전화번호로 원격지원 최근 작업을 검색하는 헬프 함수 - 작업 등록(register.html)에서 사용함.
+ */
 router.get('/api/tasks/search/recent/phone/:id', function (req, res) {
     console.log(req.params.id);
     var phone = req.params.id;
@@ -127,13 +162,15 @@ router.get('/api/tasks/search/recent/phone/:id', function (req, res) {
     });
 });
 
-
+/**
+ * 특정 원격지원 작업의 상태를 "완료"로 변경하는 함수.
+ */
 router.put('/api/tasks/update/state/finish', function (req, res) {
     console.log(req.body);
     var task = req.body;
     var record = {};
     record.state = "완료";
-    record.etime = new Date();
+    record.etime = applyTimezoneOffset(new Date());
     record.result = task.result;
     db.get().collection(collectionName).update({_id: new ObjectID(task.id)}, {$set: record}, {w: 1}, function (err) {
         if (err) {
@@ -141,6 +178,48 @@ router.put('/api/tasks/update/state/finish', function (req, res) {
         }
         else {
             res.send("ok");
+        }
+    });
+});
+
+/**
+ * 전체 원격지원 작업에서 고유한 회사명만을 리턴하는 함수.
+ */
+router.get('/api/distinct/company', function (req, res) {
+    db.get().collection(collectionName).distinct("company", function (err, records) {
+        if (err) {
+            console.log(err);
+        } else {
+            records.sort();
+            res.send(JSON.stringify(records));
+        }
+    });
+});
+
+/**
+ * 전체 원격지원 작업에서 고유한 프로젝트만을 리턴하는 함수.
+ */
+router.get('/api/distinct/project', function (req, res) {
+    db.get().collection(collectionName).distinct("project", function (err, records) {
+        if (err) {
+            console.log(err);
+        } else {
+            records.sort();
+            res.send(JSON.stringify(records));
+        }
+    });
+});
+
+/**
+ * 전체 원격지원 작업에서 고유한 사용자만을 리턴하는 함수.
+ */
+router.get('/api/distinct/name', function (req, res) {
+    db.get().collection(collectionName).distinct("name",  function (err, records) {
+        if (err) {
+            console.log(err);
+        } else {
+            records.sort();
+            res.send(JSON.stringify(records));
         }
     });
 });

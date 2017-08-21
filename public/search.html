@@ -13,7 +13,14 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script type="text/javascript">
         var domain = 'http://' + window.location.host;
+
         $(document).ready(function () {
+
+            $('body').on('click', '#distinct-item', function () {
+                var a = $(this).attr('target-input');
+                $(a).val($(this).attr('label'));
+            });
+
             $('#home').attr('href', domain);
             function search(query, grid_id) {
                 $.ajax({url: domain + '/rest/api/tasks/search', data: query, dataType: "json"}).then(function (result) {
@@ -27,13 +34,14 @@
                         paging: true,
                         data: result.records,
                         fields: [
-                            {type: "control"},
                             {name: "create", type: "text", title: "접수일자", width: 150},
                             {name: "company", type: "text", title: "회사", width: 100},
                             {name: "project", type: "text", title: "프로젝트", width: 100},
                             {name: "name", type: "text", title: "고객이름", width: 100},
+                            {name: "usertype", type: "text", title: "사용자타입", width: 100},
                             {name: "phone", type: "text", title: "전화번호", width: 100},
                             {name: "product", type: "text", title: "제품", width: 100},
+                            {name: "productdetail", type: "text", title: "제품상세분류", width: 100},
                             {name: "question", type: "text", title: "질문", width: 100},
                             {name: "member", type: "text", title: "원격지원 담당자", width: 100},
                             {name: "method", type: "text", title: "방법", width: 100},
@@ -44,6 +52,34 @@
                     });
                 });
             }
+
+            $.ajax({url: domain + '/rest/api/distinct/company'}).then(function (result) {
+               $.each(JSON.parse(result), function (index, value) {
+                   $('<li role="presentation"><a id="distinct-item" role="menuitem" target-input= "#company" label="' + value + '" tabindex="-1" href="#">' + value + '</a></li>').appendTo('#distinct-company');
+               })
+            });
+
+            $.ajax({url: domain + '/rest/api/distinct/project'}).then(function (result) {
+                $.each(JSON.parse(result), function (index, value) {
+                    $('<li role="presentation"><a id="distinct-item" role="menuitem" target-input= "#project" label="' + value + '" tabindex="-1" href="#">' + value + '</a></li>').appendTo('#distinct-project');
+                })
+            });
+
+            $.ajax({url: domain + '/rest/api/distinct/name'}).then(function (result) {
+                $.each(JSON.parse(result), function (index, value) {
+                    $('<li role="presentation"><a id="distinct-item" role="menuitem" target-input= "#name" label="' + value + '" tabindex="-1" href="#">' + value + '</a></li>').appendTo('#distinct-name');
+                })
+            });
+
+            // 회사로 검색하는 경우
+            $('#tab-date #search').click(function () {
+                var start = $('#tab-company #start').val();
+                var query = {};
+                query.start = start;
+                query.end = start;
+                search(query, '#tab-date #grid');
+            });
+
 
             // 회사로 검색하는 경우
             $('#tab-company #search').click(function () {
@@ -159,7 +195,8 @@
     </div>
     <div class="row">
         <ul class="nav nav-tabs">
-            <li class="active"><a data-toggle="tab" href="#tab-company">회사</a></li>
+            <li class="active"><a data-toggle="tab" href="#tab-date">날짜</a></li>
+            <li><a data-toggle="tab" href="#tab-company">회사</a></li>
             <li><a data-toggle="tab" href="#tab-project">프로젝트</a></li>
             <li><a data-toggle="tab" href="#tab-name">이름</a></li>
             <li><a data-toggle="tab" href="#tab-phone">연락처</a></li>
@@ -168,8 +205,27 @@
         </ul>
 
         <div class="tab-content">
+            <!-- 날짜로 조회 -->
+            <div id="tab-date" class="tab-pane fade in active">
+                <div class="container">
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <label>날짜</label>
+                            <input type="date" data-date="" data-date-format="YYYY-MM-DD" class="form-control"
+                                   id="start" placeholder="날짜(2017-01-01)입력해주세요.">
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label>&nbsp;</label>
+                            <button type="button" id="search" class="form-control btn btn-primary">조회</button>
+                        </div>
+                    </div>
+                    <div id="grid" class="row">
+                    </div>
+                </div>
+            </div>
+
             <!-- 회사로 조회 -->
-            <div id="tab-company" class="tab-pane fade in active">
+            <div id="tab-company" class="tab-pane fade">
                 <div class="container">
                     <div class="row">
                         <div class="form-group col-sm-6">
@@ -184,7 +240,16 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="form-group col-sm-6">
+                        <div class="form-group col-sm-2">
+                            <label>선택</label>
+                            <div class="dropdown">
+                                <button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown">목록에서 선택</button>
+                                <span class="caret"></span></button>
+                                <ul id="distinct-company" class="dropdown-menu">
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="form-group col-sm-4">
                             <label>회사명</label>
                             <input type="text" class="form-control" id="company" placeholder="회사명(클립소프트)을 입력해주세요.">
                         </div>
@@ -215,7 +280,16 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="form-group col-sm-6">
+                        <div class="form-group col-sm-2">
+                            <label>선택</label>
+                            <div class="dropdown">
+                                <button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown">목록에서 선택</button>
+                                <span class="caret"></span></button>
+                                <ul id="distinct-project" class="dropdown-menu">
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="form-group col-sm-4">
                             <label>프로젝트</label>
                             <input type="text" class="form-control" id="project" placeholder="프로젝트 이름을 입력해주세요.">
                         </div>
@@ -246,7 +320,16 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="form-group col-sm-6">
+                        <div class="form-group col-sm-2">
+                            <label>선택</label>
+                            <div class="dropdown">
+                                <button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown">목록에서 선택</button>
+                                <span class="caret"></span></button>
+                                <ul id="distinct-name" class="dropdown-menu">
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="form-group col-sm-4">
                             <label>이름</label>
                             <input type="text" class="form-control" id="name" placeholder="이름을 입력해주세요">
                         </div>

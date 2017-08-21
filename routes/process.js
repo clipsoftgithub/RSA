@@ -3,6 +3,12 @@ var db = require('../db');
 var router = express.Router();
 var ObjectID = require('mongodb').ObjectID;
 
+function applyTimezoneOffset(date) {
+    date.setHours((date.getHours() - date.getTimezoneOffset() / 60));
+    return date;
+}
+
+
 router.get('/', function (req, res, next) {
     var id = req.param('task');
     var member = req.param('member');
@@ -10,8 +16,8 @@ router.get('/', function (req, res, next) {
     if(member != "" && member != undefined) {
         record.member = member;
         record.state = "진행";
-        record.btime = new Date();
-        record.etime = new Date();
+        record.btime = applyTimezoneOffset(new Date());
+        record.etime = applyTimezoneOffset(new Date());
         db.get().collection('support_team').update({_id: new ObjectID(id)}, {$set: record}, {w: 1}, function (err) {
             if (err) {
                 console.warn(err.message);
