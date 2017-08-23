@@ -15,7 +15,6 @@
         var domain = 'http://' + window.location.host;
 
         $(document).ready(function () {
-
             $('body').on('click', '#distinct-item', function () {
                 var a = $(this).attr('target-input');
                 $(a).val($(this).attr('label'));
@@ -71,12 +70,11 @@
                 })
             });
 
-            // 회사로 검색하는 경우
+            // 날짜로 검색하는 경우
             $('#tab-date #search').click(function () {
-                var start = $('#tab-company #start').val();
                 var query = {};
-                query.start = start;
-                query.end = start;
+                query.type = "day";
+                query.start = $('#tab-date #start').val();
                 search(query, '#tab-date #grid');
             });
 

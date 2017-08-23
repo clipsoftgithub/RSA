@@ -20,10 +20,12 @@ router.get('/api/tasks/today', function (req, res) {
     end.setHours(23, 59, 59, 999);
     start = applyTimezoneOffset(start);
     end = applyTimezoneOffset(end);
+
     db.get().collection(collectionName).find({create: {$gte: start, $lt: end}}).toArray(function (err, docs) {
         if (err) {
             console.log(err);
         } else {
+            console.log("/api/tasks/today -> record count : " + docs.length);
             res.send(JSON.stringify(docs));
         }
     });
@@ -108,17 +110,31 @@ router.get('/api/tasks/search', function (req, res) {
     if (query == undefined)
         query = {};
 
-    var start = query.start || "";
-    var end = query.end || "";
-    if (query.start != "" && query.end != "") {
-        query.create = {$gte: new Date(query.start), $lt: new Date(query.end)};
-    } else if (query.start != "") {
-        query.create = {$gte: new Date(query.start)};
-    } else if (query.end != "") {
-        query.create = {$lt: new Date(query.end)};
+    //
+    // 지원 날짜로 검색하는 경우 달리 처리하도록 함
+    //
+    if(query.type !== undefined && query.type === "day") {
+        var start = new Date(query.start);
+        var end = new Date(query.start);
+        start.setHours(0, 0, 0, 0);
+        end.setHours(23, 59, 59, 999);
+        start = applyTimezoneOffset(start);
+        end = applyTimezoneOffset(end);
+        query = {create: {$gte: start, $lt: end}};
+    } else {
+        var start = query.start || "";
+        var end = query.end || "";
+        if (query.start != "" && query.end != "") {
+            query.create = {$gte: new Date(query.start), $lt: new Date(query.end)};
+        } else if (query.start != "") {
+            query.create = {$gte: new Date(query.start)};
+        } else if (query.end != "") {
+            query.create = {$lt: new Date(query.end)};
+        }
+        delete query.start;
+        delete query.end;
     }
-    delete query.start;
-    delete query.end;
+
     console.log(query);
     var result = {};
     db.get().collection(collectionName).find(query).toArray(function (err, records) {
@@ -133,6 +149,7 @@ router.get('/api/tasks/search', function (req, res) {
         res.json(result);
     });
 });
+
 
 /**
  * 전화번호로 원격지원 작업을 검색하는 헬프 함수 - 작업 등록(register.html)에서 사용함.
