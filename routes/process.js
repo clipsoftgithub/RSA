@@ -7,7 +7,7 @@ function applyTimezoneOffset(date) {
     date.setHours((date.getHours() - date.getTimezoneOffset() / 60));
     return date;
 }
-ßßß
+
 router.get('/', function (req, res, next) {
     var id = req.param('task');
     var member = req.param('member');
