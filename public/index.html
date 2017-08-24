@@ -54,7 +54,9 @@
                     <h4>{{project}}</h4>
                     <p>{{name}}</p>
                     <p>{{phone}}</p>
-                    <button task="{{_id}}" id="button-finish" type="button" class="btn btn-primary">상세 보기</button>
+                    <button task="{{_id}}" id="button-finish" type="button" class="btn btn-primary">보기</button>
+                    <button task="{{_id}}" id="button-edit" type="button" class="btn btn-success">편집</button>
+                    <button task="{{_id}}" id="button-delete" type="button" class="btn btn-danger">삭제</button>
                 </div>
             </div>
         </div>
@@ -95,6 +97,11 @@
                 $('[id="button-finish"]').click(function () {
                     id = $(this).attr("task");
                     $(location).attr('href', domain + '/finish?task=' + id);
+                });
+
+                $('[id="button-edit"]').click(function () {
+                    id = $(this).attr("task");
+                    $(location).attr('href', domain + '/edit?task=' + id);
                 });
 
                 $('[id="button-delete"]').click(function () {
