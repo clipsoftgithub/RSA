@@ -89,6 +89,23 @@ router.post('/api/tasks/register', function (req, res) {
 });
 
 
+/**
+ * 특정 원격지원 작업의 내용을 변경함.
+ */
+router.post('/api/tasks/edit', function (req, res) {
+    console.log(req.body);
+    var task = req.body;
+    db.get().collection(collectionName).update({_id: new ObjectID(task.id)}, {$set: task}, {w: 1}, function (err) {
+        if (err) {
+            console.warn(err.message);
+        }
+        else {
+            res.send("ok");
+        }
+    });
+});
+
+
 router.delete('/api/tasks/:id', function (req, res) {
     console.log(req.params.id);
     db.get().collection(collectionName).remove({_id: new ObjectID(req.params.id)}, function(err, records) {
