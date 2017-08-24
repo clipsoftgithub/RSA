@@ -206,7 +206,8 @@ router.put('/api/tasks/update/state/finish', function (req, res) {
     var task = req.body;
     var record = {};
     record.state = "완료";
-    record.etime = applyTimezoneOffset(new Date());
+    record.btime = applyTimezoneOffset(new Date(task.btime));
+    record.etime = applyTimezoneOffset(new Date(task.etime));
     record.result = task.result;
     db.get().collection(collectionName).update({_id: new ObjectID(task.id)}, {$set: record}, {w: 1}, function (err) {
         if (err) {

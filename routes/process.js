@@ -7,8 +7,7 @@ function applyTimezoneOffset(date) {
     date.setHours((date.getHours() - date.getTimezoneOffset() / 60));
     return date;
 }
-
-
+ßßß
 router.get('/', function (req, res, next) {
     var id = req.param('task');
     var member = req.param('member');
@@ -24,18 +23,19 @@ router.get('/', function (req, res, next) {
             }
             else {
                 console.log('successfully updated');
+                db.get().collection('support_team').find({_id: new ObjectID(id)}).limit(1).toArray(function (err, record) {
+                    if (err) {
+                        console.warn(err.message);
+                    } else {
+                        console.log(record);
+                        res.render('process', {task: record[0]});
+                    }
+                });
             }
         });
     }
 
-    db.get().collection('support_team').find({_id: new ObjectID(id)}).limit(1).toArray(function (err, record) {
-        if (err) {
-            console.warn(err.message);
-        } else {
-            console.log(record);
-            res.render('process', {task: record[0]});
-        }
-    });
+
 });
 
 module.exports = router;
