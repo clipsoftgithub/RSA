@@ -7,6 +7,7 @@ var rest = require('./routes/rest');
 var accept = require('./routes/accept');
 var process = require('./routes/process');
 var finish = require('./routes/finish');
+var edit = require('./routes/edit');
 
 var db = require('./db');
 var app = express();
@@ -32,6 +33,7 @@ app.use('/rest', rest);
 app.use('/accept', accept);
 app.use('/process', process);
 app.use('/finish', finish);
+app.use('/edit', edit);
 
 app.get('/', function(req, res) {
     res.sendFile('index.html');
