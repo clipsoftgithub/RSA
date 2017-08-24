@@ -5,37 +5,79 @@
     <title>원격지원팀</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link rel="stylesheet" href="stylesheets/style.css">
+    <style type="text/css">
+        .time-elapsd {
+            background-color: transparent;
+            border: none;
+            border-bottom: 1px solid #bdbdbd;
+            border-radius: 0;
+            outline: 0;
+            height: 4.1rem;
+            width: 15rem;
+            font-size: 2.5rem;
+            text-align: center;
+        }
+    </style>
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script type="text/javascript">
         var domain = 'http://' + window.location.host;
+        var elapsedTimer = undefined;
         $(document).ready(function () {
-            $('#usertype option').each(function() {
-                if($(this).val() == '<%=task.usertype%>') {
+            $('#usertype option').each(function () {
+                if ($(this).val() == '<%= task.usertype %>') {
                     $(this).prop("selected", true);
                 }
             });
 
-            $('#product option').each(function() {
-                if($(this).val() == '<%=task.product%>') {
+            $('#product option').each(function () {
+                if ($(this).val() == '<%= task.product %>') {
                     $(this).prop("selected", true);
                 }
             });
 
-            $('#productdetail option').each(function() {
-                if($(this).val() == '<%=task.productdetail%>') {
+            $('#productdetail option').each(function () {
+                if ($(this).val() == '<%= task.productdetail %>') {
                     $(this).prop("selected", true);
                 }
             });
 
-            $('#button-complete').click(function () {
+            $('#button-begin').click(function () {
+                var second = 0;
+                elapsedTimer = setInterval(function () {
+                    second++;
+                    var format = [];
+                    format[0] = Math.floor(second / (60 * 60));
+                    format[1] = Math.floor(second / 60) % 60;
+                    format[2] = second % 60;
+                    $('#elapsed').text(format.join(" : "));
+                }, 1000);
+                $('#btime').val(new Date());
+                $('#button-begin').removeClass('btn-primary').attr('disabled', true);
+                $('#button-finish').addClass('btn-primary').attr('disabled', false);
+            });
+
+            $('#button-finish').click(function () {
+                if (elapsedTimer !== undefined) {
+                    clearInterval(elapsedTimer);
+                    elapsedTimer = undefined;
+                }
+                $('#etime').val(new Date());
+                $('#button-finish').removeClass('btn-primary').attr('disabled', true);
+                $('#button-save').addClass('btn-primary').attr('disabled', false);
+            });
+
+
+            $('#button-save').click(function () {
                 var record = {};
-                record.id = "<%=task._id%>";
+                record.id = "<%= task._id %>";
                 record.result = $('#result').val();
+                record.btime = $('#btime').val();
+                record.etime = $('#etime').val();
                 $.ajax({
                     type: "PUT",
                     url: domain + '/rest/api/tasks/update/state/finish',
-                    data : record,
+                    data: record,
                     success: function (data) {
                         $(location).attr('href', domain);
                     }
@@ -56,18 +98,19 @@
     <div class="page-header">
         <div class="row">
             <div class="col-sm-1">
-                <img src="./images/<%=task.member%>.jpeg" width="80" width="80" style="border-radius: 50%"/>
+                <img src="./images/<%= task.member %>.jpeg" width="80" width="80" style="border-radius: 50%"/>
             </div>
             <div class="col-sm-11">
-                <h3><%=task.member%> 기술지원 진행중</h3>
+                <h3><%= task.member %> 원격지원 진행중</h3>
+                <h3 id="elapsed" class="time-elapsd"></h3>
             </div>
         </div>
     </div>
     <div class="row">
         <form>
             <div class="form-group">
-                <label>회사명</label>
-                <input type="text" class="form-control" id="company" disabled="true" value="<%=task.company%>"/>
+                <label>연락처</label>
+                <input type="text" class="form-control" id="phone" disabled="true" value="<%= task.phone %>"/>
             </div>
             <div class="form-group">
                 <label>사용자 유형</label>
@@ -77,20 +120,20 @@
                 </select>
             </div>
             <div class="form-group">
-                <label>프로젝트명</label>
-                <input type="text" class="form-control" id="project" disabled="true" value="<%=task.project%>"/>
-            </div>
-            <div class="form-group">
                 <label>이름</label>
-                <input type="text" class="form-control" id="name" disabled="true" value="<%=task.name%>"/>
+                <input type="text" class="form-control" id="name" disabled="true" value="<%= task.name %>"/>
             </div>
             <div class="form-group">
-                <label>연락처</label>
-                <input type="text" class="form-control" id="phone" disabled="true" value="<%=task.phone%>"/>
+                <label>회사명</label>
+                <input type="text" class="form-control" id="company" disabled="true" value="<%= task.company %>"/>
+            </div>
+            <div class="form-group">
+                <label>프로젝트명</label>
+                <input type="text" class="form-control" id="project" disabled="true" value="<%= task.project %>"/>
             </div>
             <div class="form-group">
                 <label>제품</label>
-                <select class="form-control" id="product">
+                <select class="form-control" id="product" disabled="true">
                     <option>렉스퍼트 2.0</option>
                     <option>렉스퍼트 2.5</option>
                     <option>렉스퍼트 3.0</option>
@@ -99,14 +142,29 @@
                 </select>
             </div>
             <div class="form-group">
+                <label>제품 상세 분류</label>
+                <select class="form-control" id="productdetail" disabled="true">
+                    <option selected>서버</option>
+                    <option>디자이너</option>
+                    <option>뷰어</option>
+                    <option>기타</option>
+                </select>
+            </div>
+            <div class="form-group">
                 <label>문의 내용</label>
-                <textarea class="form-control" id="question" rows="3" disabled="true"><%=task.question%></textarea>
+                <textarea class="form-control" id="question" rows="3" disabled="true"><%= task.question %></textarea>
             </div>
             <div class="form-group">
                 <label>기술지원 내용</label>
                 <textarea class="form-control" id="result" rows="6"></textarea>
             </div>
-            <button type="button" id="button-complete" class="btn btn-primary">기술지원 완료</button>
+            <button type="button" id="button-begin" class="btn btn-primary">시작</button>
+            <button type="button" id="button-finish" class="btn" disabled="true">종료</button>
+            <button type="button" id="button-save" class="btn" disabled="true">저장</button>
+            <div class="form-group">
+                <input type="hidden" class="form-control" id="btime" value="<%= task.btime %>"/>
+                <input type="hidden" class="form-control" id="etime" value="<%= task.etime %>"/>
+            </div>
         </form>
     </div>
 </div>

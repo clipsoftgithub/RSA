@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>원격지원팀 - 작업 편집</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="stylesheets/style.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+        var domain = 'http://' + window.location.host;
+        $(document).ready(function () {
+            $('#usertype option').each(function() {
+                if($(this).val() == '<%=task.usertype%>') {
+                    $(this).prop("selected", true);
+                }
+            });
+
+            $('#product option').each(function() {
+                if($(this).val() == '<%=task.product%>') {
+                    $(this).prop("selected", true);
+                }
+            });
+
+            $('#productdetail option').each(function() {
+                if($(this).val() == '<%=task.productdetail%>') {
+                    $(this).prop("selected", true);
+                }
+            });
+
+            $("#button-edit").click(function () {
+                var record = {};
+                record.id = "<%=task._id%>";
+                record.phone = $("#phone").val();
+                record.usertype = $("#usertype").val();
+                record.company = $("#company").val();
+                record.project = $("#project").val();
+                record.name = $("#name").val();
+                record.product = $("#product").val();
+                record.productdetail = $("#productdetail").val();
+                record.question = $("#question").val();
+                record.result = $("#result").val();
+
+                if (record.phone === "") {
+                    alert("연락처는 필수 항목입니다.");
+                    return;
+                }
+
+                if (record.company === "") {
+                    alert("회사명은 필수 항목입니다.");
+                    return;
+                }
+
+                if (record.name === "")
+                    record.name = "익명사용자"
+
+                if (record.project === "")
+                    record.project = "익명프로젝트";
+
+                record.phone = record.phone.replace(/ /g, '-');
+                $.post(domain + '/rest/api/tasks/edit', record, function (data) {
+                    if (data === "ok") {
+                        alert("편집 성공")
+                        $(location).attr('href', domain + "#finish");
+                    }
+                });
+            });
+
+        });
+    </script>
+</head>
+<body>
+<div class="container">
+    <div class="jumbotron">
+        <h2>Support Team Dashboard</h2>
+        <p>Technical support may be delivered by the different technologies depending on the situation. For example,
+            direct questions can be addressed using telephone calls, SMS, Online chat, Support Forums, E-mail or Fax;
+            basic software problems can be addressed over the telephone or, increasingly, by using remote access repair
+            services; while more complicated problems with hardware may need to be dealt with in person</p>
+    </div>
+    <div class="page-header">
+        <div class="row">
+            <div class="col-sm-1">
+                <img src="./images/<%=task.member%>.jpeg" width="80" width="80" style="border-radius: 50%"/>
+            </div>
+            <div class="col-sm-11">
+                <h3><%=task.member%> 기술지원 했고, 자료를 수정합니다.</h3>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <form>
+            <div class="form-group">
+                <label>연락처</label>
+                <input type="text" class="form-control" id="phone" value="<%=task.phone%>"/>
+            </div>
+            <div class="form-group">
+                <label>사용자 유형</label>
+                <select class="form-control" id="usertype">
+                    <option selected>일반사용자</option>
+                    <option>개발자</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>이름</label>
+                <input type="text" class="form-control" id="name" value="<%=task.name%>"/>
+            </div>
+            <div class="form-group">
+                <label>회사명</label>
+                <input type="text" class="form-control" id="company" value="<%=task.company%>"/>
+            </div>
+            <div class="form-group">
+                <label>프로젝트명</label>
+                <input type="text" class="form-control" id="project" value="<%=task.project%>"/>
+            </div>
+
+            <div class="form-group">
+                <label>제품</label>
+                <select class="form-control" id="product">
+                    <option>렉스퍼트 2.0</option>
+                    <option>렉스퍼트 2.5</option>
+                    <option>렉스퍼트 3.0</option>
+                    <option>클립리포트 4.0</option>
+                    <option>클립리포트 4.0 데몬</option>
+                    <option>웹이폼</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>제품 상세 분류</label>
+                <select class="form-control" id="productdetail">
+                    <option selected>서버</option>
+                    <option>디자이너</option>
+                    <option>뷰어</option>
+                    <option>기타</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>문의 내용</label>
+                <textarea class="form-control" id="question" rows="3"><%=task.question%></textarea>
+            </div>
+            <div class="form-group">
+                <label>기술지원 내용</label>
+                <textarea class="form-control" id="result" rows="6"><%=task.result%></textarea>
+            </div>
+            <div class="form-group">
+                <button type="button" id="button-edit" class="btn btn-primary">편집</button>
+            </div>
+        </form>
+    </div>
+</div>
+</div>
+</body>
+</html>

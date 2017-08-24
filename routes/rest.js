@@ -89,6 +89,23 @@ router.post('/api/tasks/register', function (req, res) {
 });
 
 
+/**
+ * 특정 원격지원 작업의 내용을 변경함.
+ */
+router.post('/api/tasks/edit', function (req, res) {
+    console.log(req.body);
+    var task = req.body;
+    db.get().collection(collectionName).update({_id: new ObjectID(task.id)}, {$set: task}, {w: 1}, function (err) {
+        if (err) {
+            console.warn(err.message);
+        }
+        else {
+            res.send("ok");
+        }
+    });
+});
+
+
 router.delete('/api/tasks/:id', function (req, res) {
     console.log(req.params.id);
     db.get().collection(collectionName).remove({_id: new ObjectID(req.params.id)}, function(err, records) {
@@ -189,7 +206,8 @@ router.put('/api/tasks/update/state/finish', function (req, res) {
     var task = req.body;
     var record = {};
     record.state = "완료";
-    record.etime = applyTimezoneOffset(new Date());
+    record.btime = applyTimezoneOffset(new Date(task.btime));
+    record.etime = applyTimezoneOffset(new Date(task.etime));
     record.result = task.result;
     db.get().collection(collectionName).update({_id: new ObjectID(task.id)}, {$set: record}, {w: 1}, function (err) {
         if (err) {
