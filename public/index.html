@@ -105,6 +105,8 @@
                 });
 
                 $('[id="button-delete"]').click(function () {
+                    if (confirm('삭제한 데이터는 복구할 수 없습니다. 신중하게 생각하세요. 정말 삭제하는 것 맞나요?') == false)
+                        return;
                     var id = $(this).attr('task');
                     $.ajax({url:domain + '/rest/api/tasks/' + id, type:'DELETE'}).then(function(data){
                         if(data == "ok") {
