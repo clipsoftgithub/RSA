@@ -135,24 +135,34 @@ router.get('/api/tasks/search', function (req, res) {
         var end = new Date(query.start);
         start.setHours(0, 0, 0, 0);
         end.setHours(23, 59, 59, 999);
-        start = applyTimezoneOffset(start);
-        end = applyTimezoneOffset(end);
         query = {create: {$gte: start, $lt: end}};
     } else {
-        var start = query.start || "";
-        var end = query.end || "";
+        var start = new Date(query.start || "");
+        var end = new Date(query.end || "");
         if (query.start != "" && query.end != "") {
-            query.create = {$gte: new Date(query.start), $lt: new Date(query.end)};
+            start.setHours(0, 0, 0, 0);
+            end.setHours(23, 59, 59, 999);
+            query.create = {$gte: start, $lt: end};
         } else if (query.start != "") {
-            query.create = {$gte: new Date(query.start)};
+            start.setHours(0, 0, 0, 0);
+            query.create = {$gte: start};
         } else if (query.end != "") {
-            query.create = {$lt: new Date(query.end)};
+            end.setHours(23, 59, 59, 999);
+            query.create = {$lt: end};
         }
         delete query.start;
         delete query.end;
     }
 
+    // 쿼리에 포함된 날짜를 타임존을 적용하여 변경한다.
+    if (query.create != undefined && query.create.$gte != undefined)
+        query.create.$gte = applyTimezoneOffset(query.create.$gte);
+
+    if (query.create != undefined && query.create.$lt != undefined)
+        query.create.$lt = applyTimezoneOffset(query.create.$lt);
+
     console.log(query);
+
     var result = {};
     db.get().collection(collectionName).find(query).toArray(function (err, records) {
         if (err) {
