@@ -52,6 +52,34 @@
                 });
             }
 
+
+            function search_weekly_report(query, grid_id) {
+                $.ajax({url: domain + '/rest/api/tasks/search/weekly', data: query, dataType: "json"}).then(function (result) {
+                    $(grid_id).jsGrid({
+                        width: "100%",
+                        height: "auto",
+                        filtering: false,
+                        inserting: false,
+                        editing: false,
+                        sorting: true,
+                        paging: true,
+                        data: result.records,
+                        fields: [
+                            {name: "month", type: "text", title: "월", width: 50},
+                            {name: "day", type: "text", title: "일", width: 50},
+                            {name: "member", type: "text", title: "담당자", width: 100},
+                            {name: "total", type: "text", title: "전체 건수", width: 100},
+                            {name: "rexpert25", type: "text", title: "렉스퍼트 2.5", width: 100},
+                            {name: "rexpert30", type: "text", title: "렉스퍼트 3.0", width: 100},
+                            {name: "clipreport40", type: "text", title: "클립리포트 4.0", width: 100},
+                            {name: "clipreport40deamon", type: "text", title: "클립리포트 4.0 데몬", width: 100},
+                            {name: "webeform", type: "text", title: "웹이폼", width: 100}
+                        ]
+                    });
+                });
+            }
+
+
             $.ajax({url: domain + '/rest/api/distinct/company'}).then(function (result) {
                $.each(JSON.parse(result), function (index, value) {
                    $('<li role="presentation"><a id="distinct-item" role="menuitem" target-input= "#company" label="' + value + '" tabindex="-1" href="#">' + value + '</a></li>').appendTo('#distinct-company');
@@ -175,6 +203,23 @@
                 query.end = end;
                 search(query, '#tab-member #grid');
             });
+
+
+            // 주간보고용으로 검색하는 경우
+            $('#tab-weekly-report #search').click(function () {
+                var member = $('#tab-weekly-report #member').val();
+                var start = $('#tab-weekly-report #start').val();
+                var end = $('#tab-weekly-report #end').val();
+                if (member == "" || member == undefined) {
+                    $('#tab-weekly-report #member').closest('.form-group').removeClass('has-success').addClass('has-error');
+                    return;
+                }
+                var query = {};
+                query.member = member;
+                query.start = start;
+                query.end = end;
+                search_weekly_report(query, '#tab-weekly-report #grid');
+            });
         });
     </script>
 </head>
@@ -200,6 +245,7 @@
             <li><a data-toggle="tab" href="#tab-phone">연락처</a></li>
             <li><a data-toggle="tab" href="#tab-product">제품</a></li>
             <li><a data-toggle="tab" href="#tab-member">지원담당자</a></li>
+            <li><a data-toggle="tab" href="#tab-weekly-report">주간보고용</a></li>
         </ul>
 
         <div class="tab-content">
@@ -413,6 +459,41 @@
 
             <!-- 지원 담당자로 조회 -->
             <div id="tab-member" class="tab-pane fade">
+                <div class="container">
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <label>시작</label>
+                            <input type="date" data-date="" data-date-format="YYYY-MM-DD" class="form-control"
+                                   id="start" placeholder="조회 시작 날짜(2017-01-01)를 입력해주세요.">
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label>종료</label>
+                            <input type="date" data-date="" data-date-format="YYYY-MM-DD" class="form-control" id="end"
+                                   placeholder="조회 종료 날짜(2017-01-01)를 입력해주세요.">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <label>담당자</label>
+                            <select class="form-control" id="member">
+                                <option>김숙정</option>
+                                <option selected>신종진</option>
+                                <option>박소희</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label>&nbsp;</label>
+                            <button type="button" id="search" class="form-control btn btn-primary">조회
+                            </button>
+                        </div>
+                    </div>
+                    <div id="grid" class="row">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 주간업무용 조회 -->
+            <div id="tab-weekly-report" class="tab-pane fade">
                 <div class="container">
                     <div class="row">
                         <div class="form-group col-sm-6">

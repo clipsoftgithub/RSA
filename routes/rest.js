@@ -108,7 +108,7 @@ router.post('/api/tasks/edit', function (req, res) {
 
 router.delete('/api/tasks/:id', function (req, res) {
     console.log(req.params.id);
-    db.get().collection(collectionName).remove({_id: new ObjectID(req.params.id)}, function(err, records) {
+    db.get().collection(collectionName).remove({_id: new ObjectID(req.params.id)}, function (err, records) {
         if (err) {
             console.log(err);
         }
@@ -130,7 +130,7 @@ router.get('/api/tasks/search', function (req, res) {
     //
     // 지원 날짜로 검색하는 경우 달리 처리하도록 함
     //
-    if(query.type !== undefined && query.type === "day") {
+    if (query.type !== undefined && query.type === "day") {
         var start = new Date(query.start);
         var end = new Date(query.start);
         start.setHours(0, 0, 0, 0);
@@ -164,6 +164,7 @@ router.get('/api/tasks/search', function (req, res) {
     console.log(query);
 
     var result = {};
+
     db.get().collection(collectionName).find(query).toArray(function (err, records) {
         if (err) {
             console.log(err);
@@ -175,6 +176,218 @@ router.get('/api/tasks/search', function (req, res) {
         }
         res.json(result);
     });
+});
+
+
+/**
+ * 원격지원팀 주간보고용으로 만든 함수.
+ */
+router.get('/api/tasks/search/weekly', function (req, res) {
+    var query = req.query;
+    console.log(query);
+
+    if (query == undefined)
+        query = {};
+
+    //
+    // 지원 날짜로 검색하는 경우 달리 처리하도록 함
+    //
+    if (query.type !== undefined && query.type === "day") {
+        var start = new Date(query.start);
+        var end = new Date(query.start);
+        start.setHours(0, 0, 0, 0);
+        end.setHours(23, 59, 59, 999);
+        query = {create: {$gte: start, $lt: end}};
+    } else {
+        var start = new Date(query.start || "");
+        var end = new Date(query.end || "");
+        if (query.start != "" && query.end != "") {
+            start.setHours(0, 0, 0, 0);
+            end.setHours(23, 59, 59, 999);
+            query.create = {$gte: start, $lt: end};
+        } else if (query.start != "") {
+            start.setHours(0, 0, 0, 0);
+            query.create = {$gte: start};
+        } else if (query.end != "") {
+            end.setHours(23, 59, 59, 999);
+            query.create = {$lt: end};
+        }
+        delete query.start;
+        delete query.end;
+    }
+
+    // 쿼리에 포함된 날짜를 타임존을 적용하여 변경한다.
+    if (query.create != undefined && query.create.$gte != undefined)
+        query.create.$gte = applyTimezoneOffset(query.create.$gte);
+
+    if (query.create != undefined && query.create.$lt != undefined)
+        query.create.$lt = applyTimezoneOffset(query.create.$lt);
+
+    console.log(query);
+
+    var result = {};
+    db.get().collection(collectionName).aggregate([
+        {
+            $match: query
+        },
+        {
+            $project: {
+                "month": {$month: "$create"},
+                "day": {$dayOfMonth: "$create"},
+                "member": "$member",
+                "product": "$product"
+            }
+        },
+        {
+            $group: {
+                _id: {member: "$member", month: "$month", day: "$day"}, total: {$sum: 1},
+                rexpert25: {
+                    $sum: {$cond: [{$eq: ["$product", "렉스퍼트 2.5"]}, 1, 0]}
+                },
+                rexpert30: {
+                    $sum: {$cond: [{$eq: ["$product", "렉스퍼트 3.0"]}, 1, 0]}
+                },
+                clipreport40: {
+                    $sum: {$cond: [{$eq: ["$product", "클립리포트 4.0"]}, 1, 0]}
+                },
+                clipreport40daemon: {
+                    $sum: {$cond: [{$eq: ["$product", "클립리포트 4.0 데몬"]}, 1, 0]}
+                },
+                webeform: {
+                    $sum: {$cond: [{$eq: ["$product", "웹이폼"]}, 1, 0]}
+                },
+            }
+        },
+        {
+            $sort : {"_id.month": 1, "_id.day" : 1}
+        },
+
+    ]).toArray(function (err, records) {
+        if (err) {
+            console.log(err);
+            result.result = "error";
+            result.error = err;
+        } else {
+            result.result = "ok";
+            result.records = records;
+        }
+        if (result.records != undefined) {
+            result.records.forEach(function (record, index) {
+                record.member = record._id.member;
+                record.month = record._id.month;
+                record.day = record._id.day;
+                delete record._id;
+            });
+        }
+        console.log(records);
+        res.json(result);
+    });
+
+
+    // 그룹핑하는 다른 방법 중에 하나 나중에 참고용으로
+    // db.get().collection(collectionName).aggregate([
+    //     {$match: query},
+    //     {
+    //         $project: {
+    //             "totalAmount": 1,
+    //             "month": {$month: "$create"},
+    //             "day": {$dayOfMonth: "$create"},
+    //             "member": "$member",
+    //             "product": "$product"
+    //         }
+    //     },
+    //     {
+    //         $group: {
+    //             _id: {member: "$member", month: "$month", day: "$day"}, total: {$sum: 1},
+    //             rexpert25: {
+    //                 $sum: {
+    //                     $switch: {
+    //                         branches: [
+    //                             {
+    //                                 "case": {$eq: ["$product", "렉스퍼트 2.5"]},
+    //                                 "then": 1
+    //                             }
+    //                         ],
+    //                         default: 0
+    //                     }
+    //                 }
+    //             },
+    //             rexpert30: {
+    //                 $sum: {
+    //                     $switch: {
+    //                         branches: [
+    //                             {
+    //                                 "case": {$eq: ["$product", "렉스퍼트 3.0"]},
+    //                                 "then": 1
+    //                             }
+    //                         ],
+    //                         default: 0
+    //                     }
+    //                 }
+    //             },
+    //             clipreport40: {
+    //                 $sum: {
+    //                     $switch: {
+    //                         branches: [
+    //                             {
+    //                                 "case": {$eq: ["$product", "클립리포트 4.0"]},
+    //                                 "then": 1
+    //                             }
+    //                         ],
+    //                         default: 0
+    //                     }
+    //                 }
+    //             },
+    //             clipreport40daemon: {
+    //                 $sum: {
+    //                     $switch: {
+    //                         branches: [
+    //                             {
+    //                                 "case": {$eq: ["$product", "클립리포트 4.0 데몬"]},
+    //                                 "then": 1
+    //                             }
+    //                         ],
+    //                         default: 0
+    //                     }
+    //                 }
+    //             },
+    //             webeform: {
+    //                 $sum: {
+    //                     $switch: {
+    //                         branches: [
+    //                             {
+    //                                 "case": {$eq: ["$product", "웹이폼"]},
+    //                                 "then": 1
+    //                             }
+    //                         ],
+    //                         default: 0
+    //                     }
+    //                 }
+    //             },
+    //         }
+    //     }
+    // ]).toArray(function (err, records) {
+    //     if (err) {
+    //         console.log(err);
+    //         result.result = "error";
+    //         result.error = err;
+    //     } else {
+    //         result.result = "ok";
+    //         result.records = records;
+    //     }
+    //     if (result.records != undefined) {
+    //         result.records.forEach(function (record, index) {
+    //             record.member = record._id.member;
+    //             record.month = record._id.month;
+    //             record.day = record._id.day;
+    //             delete record._id;
+    //         });
+    //     }
+    //     console.log(records);
+    //     res.json(result);
+    // });
+
+
 });
 
 
@@ -261,7 +474,7 @@ router.get('/api/distinct/project', function (req, res) {
  * 전체 원격지원 작업에서 고유한 사용자만을 리턴하는 함수.
  */
 router.get('/api/distinct/name', function (req, res) {
-    db.get().collection(collectionName).distinct("name",  function (err, records) {
+    db.get().collection(collectionName).distinct("name", function (err, records) {
         if (err) {
             console.log(err);
         } else {
