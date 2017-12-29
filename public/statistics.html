@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>클립소프트 원격지원팀 이력 조회</title>
+    <title>클립소프트 원격지원팀 통계</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid.min.css">
     <link rel="stylesheet" href=" https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid-theme.min.css">
@@ -15,49 +15,12 @@
         var domain = 'http://' + window.location.host;
 
         $(document).ready(function () {
-            $('body').on('click', '#distinct-item', function () {
-                var a = $(this).attr('target-input');
-                $(a).val($(this).attr('label'));
-            });
-
             $('#home').attr('href', domain);
             $('#search').attr('href', domain + '/search');
             $('#statistics').attr('href', domain + '/statistics.html');
 
             function search(query, grid_id) {
-                $.ajax({url: domain + '/rest/api/tasks/search', data: query, dataType: "json"}).then(function (result) {
-                    $(grid_id).jsGrid({
-                        width: "100%",
-                        height: "100%",
-                        filtering: false,
-                        inserting: false,
-                        editing: false,
-                        sorting: true,
-                        paging: true,
-                        data: result.records,
-                        fields: [
-                            {name: "create", type: "text", title: "접수일자", width: 150},
-                            {name: "company", type: "text", title: "회사", width: 100},
-                            {name: "project", type: "text", title: "프로젝트", width: 100},
-                            {name: "name", type: "text", title: "고객이름", width: 100},
-                            {name: "usertype", type: "text", title: "사용자타입", width: 100},
-                            {name: "phone", type: "text", title: "전화번호", width: 100},
-                            {name: "product", type: "text", title: "제품", width: 100},
-                            {name: "productdetail", type: "text", title: "제품상세분류", width: 100},
-                            {name: "question", type: "text", title: "질문", width: 100},
-                            {name: "result", type: "text", title: "기술지원내용", width: 100},
-                            {name: "member", type: "text", title: "원격지원 담당자", width: 100},
-                            {name: "btime", type: "text", title: "시작시간", width: 100},
-                            {name: "etime", type: "text", title: "마친시간", width: 100},
-                            {name: "state", type: "text", title: "상태", width: 100}
-                        ]
-                    });
-                });
-            }
-
-
-            function search_weekly_report(query, grid_id) {
-                $.ajax({url: domain + '/rest/api/tasks/search/weekly', data: query, dataType: "json"}).then(function (result) {
+                $.ajax({url: domain + '/rest/api/tasks/statistics', data: query, dataType: "json"}).then(function (result) {
                     $(grid_id).jsGrid({
                         width: "100%",
                         height: "auto",
@@ -68,9 +31,7 @@
                         paging: true,
                         data: result.records,
                         fields: [
-                            {name: "month", type: "text", title: "월", width: 50},
-                            {name: "day", type: "text", title: "일", width: 50},
-                            {name: "member", type: "text", title: "담당자", width: 100},
+                            {name: "key", type: "text", title: "항목", width: 100},
                             {name: "total", type: "text", title: "전체 건수", width: 100},
                             {name: "rexpert25", type: "text", title: "렉스퍼트 2.5", width: 100},
                             {name: "rexpert30", type: "text", title: "렉스퍼트 3.0", width: 100},
@@ -82,45 +43,12 @@
                 });
             }
 
-
-            $.ajax({url: domain + '/rest/api/distinct/company'}).then(function (result) {
-               $.each(JSON.parse(result), function (index, value) {
-                   $('<li role="presentation"><a id="distinct-item" role="menuitem" target-input= "#company" label="' + value + '" tabindex="-1" href="#">' + value + '</a></li>').appendTo('#distinct-company');
-               })
-            });
-
-            $.ajax({url: domain + '/rest/api/distinct/project'}).then(function (result) {
-                $.each(JSON.parse(result), function (index, value) {
-                    $('<li role="presentation"><a id="distinct-item" role="menuitem" target-input= "#project" label="' + value + '" tabindex="-1" href="#">' + value + '</a></li>').appendTo('#distinct-project');
-                })
-            });
-
-            $.ajax({url: domain + '/rest/api/distinct/name'}).then(function (result) {
-                $.each(JSON.parse(result), function (index, value) {
-                    $('<li role="presentation"><a id="distinct-item" role="menuitem" target-input= "#name" label="' + value + '" tabindex="-1" href="#">' + value + '</a></li>').appendTo('#distinct-name');
-                })
-            });
-
-            // 날짜로 검색하는 경우
-            $('#tab-date #search').click(function () {
-                var query = {};
-                query.type = "day";
-                query.start = $('#tab-date #start').val();
-                search(query, '#tab-date #grid');
-            });
-
-
             // 회사로 검색하는 경우
             $('#tab-company #search').click(function () {
-                var company = $('#company').val();
                 var start = $('#tab-company #start').val();
                 var end = $('#tab-company #end').val();
-                if (company == "" || company == undefined) {
-                    $('#company').closest('.form-group').removeClass('has-success').addClass('has-error');
-                    return;
-                }
                 var query = {};
-                query.company = company;
+                query.key = 'company';
                 query.start = start;
                 query.end = end;
                 search(query, '#tab-company #grid');
@@ -128,15 +56,10 @@
 
             // 프로젝트로 검색하는 경우
             $('#tab-project #search').click(function () {
-                var project = $('#project').val();
                 var start = $('#tab-project #start').val();
                 var end = $('#tab-project #end').val();
-                if (project == "" || project == undefined) {
-                    $('#project').closest('.form-group').removeClass('has-success').addClass('has-error');
-                    return;
-                }
                 var query = {};
-                query.project = project;
+                query.key = 'project';
                 query.start = start;
                 query.end = end;
                 search(query, '#tab-project #grid');
@@ -144,15 +67,10 @@
 
             // 이름으로 검색하는 경우
             $('#tab-name #search').click(function () {
-                var name = $('#name').val();
                 var start = $('#tab-name #start').val();
                 var end = $('#tab-name #end').val();
-                if (name == "" || name == undefined) {
-                    $('#name').closest('.form-group').removeClass('has-success').addClass('has-error');
-                    return;
-                }
                 var query = {};
-                query.name = name;
+                query.key = 'name';
                 query.start = start;
                 query.end = end;
 
@@ -161,15 +79,10 @@
 
             // 연락처로 검색하는 경우
             $('#tab-phone #search').click(function () {
-                var phone = $('#phone').val();
                 var start = $('#tab-phone #start').val();
                 var end = $('#tab-phone #end').val();
-                if (phone == "" || phone == undefined) {
-                    $('#phone').closest('.form-group').removeClass('has-success').addClass('has-error');
-                    return;
-                }
                 var query = {};
-                query.phone = phone;
+                query.key = 'phone';
                 query.start = start;
                 query.end = end;
                 search(query, '#tab-phone #grid');
@@ -177,15 +90,10 @@
 
             // 제품명으로 검색하는 경우
             $('#tab-product #search').click(function () {
-                var product = $('#product').val();
                 var start = $('#tab-product #start').val();
                 var end = $('#tab-product #end').val();
-                if (product == "" || product == undefined) {
-                    $('#product').closest('.form-group').removeClass('has-success').addClass('has-error');
-                    return;
-                }
                 var query = {};
-                query.product = product;
+                query.key = 'product';
                 query.start = start;
                 query.end = end;
                 search(query, '#tab-product #grid');
@@ -193,36 +101,15 @@
 
             // 담당자로 검색하는 경우
             $('#tab-member #search').click(function () {
-                var member = $('#member').val();
                 var start = $('#tab-member #start').val();
                 var end = $('#tab-member #end').val();
-                if (member == "" || member == undefined) {
-                    $('#member').closest('.form-group').removeClass('has-success').addClass('has-error');
-                    return;
-                }
                 var query = {};
-                query.member = member;
+                query.key = 'member';
                 query.start = start;
                 query.end = end;
                 search(query, '#tab-member #grid');
             });
 
-
-            // 주간보고용으로 검색하는 경우
-            $('#tab-weekly-report #search').click(function () {
-                var member = $('#tab-weekly-report #member').val();
-                var start = $('#tab-weekly-report #start').val();
-                var end = $('#tab-weekly-report #end').val();
-                if (member == "" || member == undefined) {
-                    $('#tab-weekly-report #member').closest('.form-group').removeClass('has-success').addClass('has-error');
-                    return;
-                }
-                var query = {};
-                query.member = member;
-                query.start = start;
-                query.end = end;
-                search_weekly_report(query, '#tab-weekly-report #grid');
-            });
         });
     </script>
 </head>
@@ -239,42 +126,21 @@
         <a id="home">홈</a>
         <a id="search">검색</a>
         <a id="statistics">통계</a>
-        <h3>클립소프트 원격지원 이력 조회</h3>
+        <h3>클립소프트 원격지원 이력 통계</h3>
     </div>
     <div class="row">
         <ul class="nav nav-tabs">
-            <li class="active"><a data-toggle="tab" href="#tab-date">날짜</a></li>
-            <li><a data-toggle="tab" href="#tab-company">회사</a></li>
+            <li class="active"><a data-toggle="tab" href="#tab-company">회사</a></li>
             <li><a data-toggle="tab" href="#tab-project">프로젝트</a></li>
             <li><a data-toggle="tab" href="#tab-name">이름</a></li>
             <li><a data-toggle="tab" href="#tab-phone">연락처</a></li>
             <li><a data-toggle="tab" href="#tab-product">제품</a></li>
             <li><a data-toggle="tab" href="#tab-member">지원담당자</a></li>
-            <li><a data-toggle="tab" href="#tab-weekly-report">주간보고용</a></li>
         </ul>
 
         <div class="tab-content">
-            <!-- 날짜로 조회 -->
-            <div id="tab-date" class="tab-pane fade in active">
-                <div class="container">
-                    <div class="row">
-                        <div class="form-group col-sm-6">
-                            <label>날짜</label>
-                            <input type="date" data-date="" data-date-format="YYYY-MM-DD" class="form-control"
-                                   id="start" placeholder="날짜(2017-01-01)입력해주세요.">
-                        </div>
-                        <div class="form-group col-sm-6">
-                            <label>&nbsp;</label>
-                            <button type="button" id="search" class="form-control btn btn-primary">조회</button>
-                        </div>
-                    </div>
-                    <div id="grid" class="row">
-                    </div>
-                </div>
-            </div>
-
             <!-- 회사로 조회 -->
-            <div id="tab-company" class="tab-pane fade">
+            <div id="tab-company" class="tab-pane fade in active">
                 <div class="container">
                     <div class="row">
                         <div class="form-group col-sm-6">
@@ -289,19 +155,6 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="form-group col-sm-2">
-                            <label>선택</label>
-                            <div class="dropdown">
-                                <button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown">목록에서 선택</button>
-                                <span class="caret"></span></button>
-                                <ul id="distinct-company" class="dropdown-menu">
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="form-group col-sm-4">
-                            <label>회사명</label>
-                            <input type="text" class="form-control" id="company" placeholder="회사명(클립소프트)을 입력해주세요.">
-                        </div>
                         <div class="form-group col-sm-6">
                             <label>&nbsp;</label>
                             <button type="button" id="search" class="form-control btn btn-primary">조회
@@ -329,19 +182,6 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="form-group col-sm-2">
-                            <label>선택</label>
-                            <div class="dropdown">
-                                <button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown">목록에서 선택</button>
-                                <span class="caret"></span></button>
-                                <ul id="distinct-project" class="dropdown-menu">
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="form-group col-sm-4">
-                            <label>프로젝트</label>
-                            <input type="text" class="form-control" id="project" placeholder="프로젝트 이름을 입력해주세요.">
-                        </div>
                         <div class="form-group col-sm-6">
                             <label>&nbsp;</label>
                             <button type="button" id="search" class="form-control btn btn-primary">조회
@@ -369,19 +209,6 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="form-group col-sm-2">
-                            <label>선택</label>
-                            <div class="dropdown">
-                                <button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown">목록에서 선택</button>
-                                <span class="caret"></span></button>
-                                <ul id="distinct-name" class="dropdown-menu">
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="form-group col-sm-4">
-                            <label>이름</label>
-                            <input type="text" class="form-control" id="name" placeholder="이름을 입력해주세요">
-                        </div>
                         <div class="form-group col-sm-6">
                             <label>&nbsp;</label>
                             <button type="button" id="search" class="form-control btn btn-primary">조회
@@ -410,10 +237,6 @@
                     </div>
                     <div class="row">
                         <div class="form-group col-sm-6">
-                            <label>연락처</label>
-                            <input type="text" class="form-control" id="phone" placeholder="연락처를 입력해주세요">
-                        </div>
-                        <div class="form-group col-sm-6">
                             <label>&nbsp;</label>
                             <button type="button" id="search" class="form-control btn btn-primary">조회
                             </button>
@@ -441,17 +264,6 @@
                     </div>
                     <div class="row">
                         <div class="form-group col-sm-6">
-                            <label>제품명</label>
-                            <select class="form-control" id="product">
-                                <option>렉스퍼트 2.0</option>
-                                <option>렉스퍼트 2.5</option>
-                                <option>렉스퍼트 3.0</option>
-                                <option selected>클립리포트 4.0</option>
-                                <option>클립리포트 4.0 데몬</option>
-                                <option>웹이폼</option>
-                            </select>
-                        </div>
-                        <div class="form-group col-sm-6">
                             <label>&nbsp;</label>
                             <button type="button" id="search" class="form-control btn btn-primary">조회
                             </button>
@@ -478,49 +290,6 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="form-group col-sm-6">
-                            <label>담당자</label>
-                            <select class="form-control" id="member">
-                                <option>김숙정</option>
-                                <option selected>신종진</option>
-                                <option>박소희</option>
-                            </select>
-                        </div>
-                        <div class="form-group col-sm-6">
-                            <label>&nbsp;</label>
-                            <button type="button" id="search" class="form-control btn btn-primary">조회
-                            </button>
-                        </div>
-                    </div>
-                    <div id="grid" class="row">
-                    </div>
-                </div>
-            </div>
-
-            <!-- 주간업무용 조회 -->
-            <div id="tab-weekly-report" class="tab-pane fade">
-                <div class="container">
-                    <div class="row">
-                        <div class="form-group col-sm-6">
-                            <label>시작</label>
-                            <input type="date" data-date="" data-date-format="YYYY-MM-DD" class="form-control"
-                                   id="start" placeholder="조회 시작 날짜(2017-01-01)를 입력해주세요.">
-                        </div>
-                        <div class="form-group col-sm-6">
-                            <label>종료</label>
-                            <input type="date" data-date="" data-date-format="YYYY-MM-DD" class="form-control" id="end"
-                                   placeholder="조회 종료 날짜(2017-01-01)를 입력해주세요.">
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-sm-6">
-                            <label>담당자</label>
-                            <select class="form-control" id="member">
-                                <option>김숙정</option>
-                                <option selected>신종진</option>
-                                <option>박소희</option>
-                            </select>
-                        </div>
                         <div class="form-group col-sm-6">
                             <label>&nbsp;</label>
                             <button type="button" id="search" class="form-control btn btn-primary">조회

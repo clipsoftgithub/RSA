@@ -74,7 +74,7 @@ $ ps kill 8066
 |SELECT * FROM users LIMIT 10 SKIP 20|SELECT * FROM users LIMIT 10 SKIP 20|
 |SELECT * FROM users WHERE a=1 or b=2|db.users.find( { $or : [ { a : 1 } , { b : 2 } ] } )|
 |SELECT * FROM users LIMIT 1|db.users.findOne()|
-|SELECT DISTINCT last_name FROM users|db.users.distinct('last_name')|
+|SELECT DISTINCT last_name FROM users|db.u결sers.distinct('last_name')|
 |SELECT COUNT(*y) FROM users|db.users.count()|
 |SELECT COUNT(*y) FROM users where AGE > 30|db.users.find({age: {'$gt': 30}}).count()|
 |SELECT COUNT(AGE) from users	 db.users.find({age: {'$exists': true}}).count()|
@@ -84,3 +84,8 @@ $ ps kill 8066
 |UPDATE users SET a=1 WHERE b='q'|db.users.update({b:'q'}, {$set:{a:1}}, false, true)|
 |UPDATE users SET a=a+2 WHERE b='q'|db.users.update({b:'q'}, {$inc:{a:2}}, false, true)|
 |DELETE FROM users WHERE z="abc"|db.users.remove({z:'abc'});|
+
+
+## 몽고디비 백업
+mongodump --out ~/clipsoft/RSAMongobackup/20171116
+mongodump --out ~/clipsoft/RSAMongobackup/20171205

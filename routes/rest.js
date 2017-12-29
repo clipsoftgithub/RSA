@@ -391,6 +391,100 @@ router.get('/api/tasks/search/weekly', function (req, res) {
 });
 
 
+
+/**
+ * 원격지원팀 통계용으로 만든 함수.
+ */
+router.get('/api/tasks/statistics', function (req, res) {
+    var query = req.query;
+    console.log(query);
+
+    if (query == undefined)
+        query = {};
+
+
+    var start = new Date(query.start || "");
+    var end = new Date(query.end || "");
+    var key = query.key;
+    if (query.start != "" && query.end != "") {
+        start.setHours(0, 0, 0, 0);
+        end.setHours(23, 59, 59, 999);
+        query.create = {$gte: start, $lt: end};
+    } else if (query.start != "") {
+        start.setHours(0, 0, 0, 0);
+        query.create = {$gte: start};
+    } else if (query.end != "") {
+        end.setHours(23, 59, 59, 999);
+        query.create = {$lt: end};
+    }
+    delete query.key;
+    delete query.start;
+    delete query.end;
+
+
+    // 쿼리에 포함된 날짜를 타임존을 적용하여 변경한다.
+    if (query.create != undefined && query.create.$gte != undefined)
+        query.create.$gte = applyTimezoneOffset(query.create.$gte);
+
+    if (query.create != undefined && query.create.$lt != undefined)
+        query.create.$lt = applyTimezoneOffset(query.create.$lt);
+
+    console.log(query);
+
+    var result = {};
+    db.get().collection(collectionName).aggregate([
+        {
+            $match: query
+        },
+        {
+            $group: {
+                _id: {key: '$' + key},
+                total: {
+                    $sum: 1
+                },
+                rexpert25: {
+                    $sum: {$cond: [{$eq: ["$product", "렉스퍼트 2.5"]}, 1, 0]}
+                },
+                rexpert30: {
+                    $sum: {$cond: [{$eq: ["$product", "렉스퍼트 3.0"]}, 1, 0]}
+                },
+                clipreport40: {
+                    $sum: {$cond: [{$eq: ["$product", "클립리포트 4.0"]}, 1, 0]}
+                },
+                clipreport40daemon: {
+                    $sum: {$cond: [{$eq: ["$product", "클립리포트 4.0 데몬"]}, 1, 0]}
+                },
+                webeform: {
+                    $sum: {$cond: [{$eq: ["$product", "웹이폼"]}, 1, 0]}
+                },
+            }
+        },
+        {
+            $sort : {"total": -1}
+        },
+
+    ]).toArray(function (err, records) {
+        if (err) {
+            console.log(err);
+            result.result = "error";
+            result.error = err;
+        } else {
+            result.result = "ok";
+            result.records = records;
+        }
+        if (result.records != undefined) {
+            result.records.forEach(function (record, index) {
+                record.key = record._id.key;
+                delete record._id;
+            });
+        }
+        console.log(records);
+        res.json(result);
+    });
+
+});
+
+
 /**
  * 전화번호로 원격지원 작업을 검색하는 헬프 함수 - 작업 등록(register.html)에서 사용함.
  */

@@ -73,6 +73,7 @@
         $(document).ready(function () {
             $('#home').attr('href', domain);
             $('#search').attr('href', domain + '/search');
+            $('#statistics').attr('href', domain + '/statistics.html');
 
             $.ajax({url: domain + '/rest/api/tasks/today'}).then(function (data) {
                 var tasks = JSON.parse(data);
@@ -139,8 +140,9 @@
             services; while more complicated problems with hardware may need to be dealt with in person</p>
     </div>
     <div class="page-header">
-        <a id="home"><img src="./images/home.png" width="100" width="100"></a>
-        <a id="search"><img src="./images/search.png" width="100" width="100"></a>
+        <a id="home">홈</a>
+        <a id="search">검색</a>
+        <a id="statistics">통계</a>
         <h3>클립소프트 원격지원 현황</h3>
     </div>
     <div class="row">

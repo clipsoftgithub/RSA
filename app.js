@@ -12,11 +12,20 @@ var edit = require('./routes/edit');
 var db = require('./db');
 var app = express();
 
-db.connect('mongodb://localhost:27017/clipsoft', function (err) {
+//
+// db.connect('mongodb://localhost:27017/clipsoft', function (err) {
+//     if (err) {
+//         console.log('Unable to connect to MongoDB');
+//     }
+// });
+//
+
+db.connect('mongodb://52.79.168.11:27017/clipsoft', function (err) {
     if (err) {
         console.log('Unable to connect to MongoDB');
     }
 });
+
 
 
 // view engine setup
