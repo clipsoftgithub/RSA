@@ -207,6 +207,21 @@
                 search(query, '#tab-member #grid');
             });
 
+            // 내용으로 검색하는 경우
+            $('#tab-content #search').click(function () {
+                var content = $('#content').val();
+                var start = $('#tab-member #start').val();
+                var end = $('#tab-member #end').val();
+                if (content == "" || content == undefined) {
+                    $('#content').closest('.form-group').removeClass('has-success').addClass('has-error');
+                    return;
+                }
+                var query = {};
+                query.content = content;
+                query.start = start;
+                query.end = end;
+                search(query, '#tab-content #grid');
+            });
 
             // 주간보고용으로 검색하는 경우
             $('#tab-weekly-report #search').click(function () {
@@ -249,6 +264,7 @@
             <li><a data-toggle="tab" href="#tab-name">이름</a></li>
             <li><a data-toggle="tab" href="#tab-phone">연락처</a></li>
             <li><a data-toggle="tab" href="#tab-product">제품</a></li>
+            <li><a data-toggle="tab" href="#tab-content">내용</a></li>
             <li><a data-toggle="tab" href="#tab-member">지원담당자</a></li>
             <li><a data-toggle="tab" href="#tab-weekly-report">주간보고용</a></li>
         </ul>
@@ -496,6 +512,38 @@
                     </div>
                 </div>
             </div>
+
+            <!-- 내용으로  조회 -->
+            <div id="tab-content" class="tab-pane fade">
+                <div class="container">
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <label>시작</label>
+                            <input type="date" data-date="" data-date-format="YYYY-MM-DD" class="form-control"
+                                   id="start" placeholder="조회 시작 날짜(2017-01-01)를 입력해주세요.">
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label>종료</label>
+                            <input type="date" data-date="" data-date-format="YYYY-MM-DD" class="form-control" id="end"
+                                   placeholder="조회 종료 날짜(2017-01-01)를 입력해주세요.">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <label>내용</label>
+                            <input type="text" class="form-control" id="content">
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label>&nbsp;</label>
+                            <button type="button" id="search" class="form-control btn btn-primary">조회
+                            </button>
+                        </div>
+                    </div>
+                    <div id="grid" class="row">
+                    </div>
+                </div>
+            </div>
+
 
             <!-- 주간업무용 조회 -->
             <div id="tab-weekly-report" class="tab-pane fade">

@@ -161,6 +161,12 @@ router.get('/api/tasks/search', function (req, res) {
     if (query.create != undefined && query.create.$lt != undefined)
         query.create.$lt = applyTimezoneOffset(query.create.$lt);
 
+
+    if (query.content != undefined && query.content != "") {
+        query.result = {$regex : query.content};
+        delete query.content;
+    }
+
     console.log(query);
 
     var result = {};
