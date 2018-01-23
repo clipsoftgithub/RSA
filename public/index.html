@@ -16,6 +16,21 @@
             height: 80px;
             border-radius: 50%;
         }
+
+        span.color {
+            border-style : solid;
+            border-color : lightsteelblue;
+            border-width : 1px;
+            border-radius: 50% 50% 50% 50%;
+            display: inline-block;
+            height: 20px;
+            margin-bottom: -11px;
+            margin-right: 9px;
+            padding: 8px;
+            position: relative;
+            width: 20px;
+        }
+
     </style>
 
     <script id="accept-template" type="text/x-handlebars-template">
@@ -47,16 +62,33 @@
     </script>
 
     <script id="finish-template" type="text/x-handlebars-template">
-        <div class="col-xs-18 col-sm-6 col-md-3">
-            <div class="thumbnail">
+        <div class="col-sm-6 col-md-3">
+            {{#if tags.color}}
+                <div class="thumbnail" style="border-color:{{tags.color}};border-width:3px">
+            {{else}}
+                <div class="thumbnail" style="border-color:white;border-width:3px">
+            {{/if}}
+                <div class="btn-group btn-group-danger" align="right">
+                    <button class="btn btn-danger btn-sm" type="button">메뉴</button>
+                    <button data-toggle="dropdown" class="btn btn-danger btn-sm dropdown-toggle" type="button">
+                        <span class="caret"></span></button>
+                    <ul class="dropdown-menu">
+                        <li><a href="#" task="{{_id}}" id="button-finish">보기</a></li>
+                        <li><a href="#" task="{{_id}}" id="button-edit">편집</a></li>
+                        <li><a href="#" task="{{_id}}" id="button-delete">삭제</a></li>
+                    </ul>
+                </div>
                 <img title="{{member}}" src="./images/{{member}}.jpeg"/>
                 <div class="caption">
                     <h4>{{project}}</h4>
                     <p>{{name}}</p>
                     <p>{{phone}}</p>
-                    <button task="{{_id}}" id="button-finish" type="button" class="btn btn-primary">보기</button>
-                    <button task="{{_id}}" id="button-edit" type="button" class="btn btn-success">편집</button>
-                    <button task="{{_id}}" id="button-delete" type="button" class="btn btn-danger">삭제</button>
+                    <!-- https://bootsnipp.com/snippets/Q05Rv -->
+                    <span class="color" task="{{_id}}" id="button-color" color="#FFFFFF" style="background-color:#FFFFFF;cursor:pointer"></span>
+                    <span class="color" task="{{_id}}" id="button-color" color="#EF5350" style="background-color:#EF5350;cursor:pointer"></span>
+                    <span class="color" task="{{_id}}" id="button-color" color="#4DB6AC" style="background-color:#4DB6AC;cursor:pointer"></span>
+                    <span class="color" task="{{_id}}" id="button-color" color="#7986CB" style="background-color:#7986CB;cursor:pointer"></span>
+                    <span class="color" task="{{_id}}" id="button-color" color="#FFB74D" style="background-color:#FFB74D;cursor:pointer"></span>
                 </div>
             </div>
         </div>
@@ -126,6 +158,20 @@
                 $('#button-assign').click(function () {
                     $(location).attr('href', domain + '/assign');
                 });
+
+                $('[id="button-color"]').click(function () {
+                    var color = $(this).attr("color");
+                    $(this).parent().parent().css('border-color', color);
+                    $(this).parent().parent().css('border-width', '3px');
+
+                    var task = {};
+                    task._id = $(this).attr('task');
+                    task.tags = {};
+                    task.tags.color = color;
+                    $.ajax({url:domain + '/rest/api/tasks', type:'PUT', data : task}).then(function(data){});
+
+                });
+
             });
         });
     </script>

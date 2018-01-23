@@ -89,3 +89,4 @@ $ ps kill 8066
 ## 몽고디비 백업
 mongodump --out ~/clipsoft/RSAMongobackup/20171116
 mongodump --out ~/clipsoft/RSAMongobackup/20171205
+mongodump --out ~/clipsoft/RSAMongobackup/20180123

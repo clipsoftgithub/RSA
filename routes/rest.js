@@ -186,6 +186,33 @@ router.get('/api/tasks/search', function (req, res) {
 
 
 /**
+ * 원격지원 작업을 업데이트하는 함수.
+ */
+router.put('/api/tasks', function (req, res) {
+    var query = req.body;
+    console.log(query);
+
+    if (query == undefined)
+        query = {};
+
+    var id = query._id;
+    if (id === undefined || id === '') {
+        console.error('id is null');
+        return;
+    }
+
+    delete query._id;
+    try {
+        db.get().collection(collectionName).update({_id: new ObjectID(id)}, {$set: query});
+    } catch(e) {
+        console.warn(e);
+    }
+    res.send("ok");
+});
+
+
+
+/**
  * 원격지원팀 주간보고용으로 만든 함수.
  */
 router.get('/api/tasks/search/weekly', function (req, res) {

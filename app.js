@@ -12,19 +12,19 @@ var edit = require('./routes/edit');
 var db = require('./db');
 var app = express();
 
-//
-// db.connect('mongodb://localhost:27017/clipsoft', function (err) {
-//     if (err) {
-//         console.log('Unable to connect to MongoDB');
-//     }
-// });
-//
 
-db.connect('mongodb://52.79.168.11:27017/clipsoft', function (err) {
+db.connect('mongodb://localhost:27017/clipsoft', function (err) {
     if (err) {
         console.log('Unable to connect to MongoDB');
     }
 });
+
+
+// db.connect('mongodb://52.79.168.11:27017/clipsoft', function (err) {
+//     if (err) {
+//         console.log('Unable to connect to MongoDB');
+//     }
+// });
 
 
 
@@ -34,7 +34,12 @@ app.set('view engine', 'ejs');
 
 app.use(logger('dev'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+
+//
+// https://stackoverflow.com/questions/26711666/can-not-post-the-nested-object-json-to-node-express-body-parser
+// Can not post the nested object json to node express body parser
+//
+app.use(bodyParser.urlencoded({ extended: true })); // false 을 true 로 수정함.
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
