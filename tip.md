@@ -90,3 +90,7 @@ $ ps kill 8066
 mongodump --out ~/clipsoft/RSAMongobackup/20171116
 mongodump --out ~/clipsoft/RSAMongobackup/20171205
 mongodump --out ~/clipsoft/RSAMongobackup/20180123
+
+## update 
+forever stop 0
+forever start ./bin/www

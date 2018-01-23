@@ -211,6 +211,19 @@ router.put('/api/tasks', function (req, res) {
 });
 
 
+/**
+ * "고정" 상태에 있는 모든 원격지원 작업을 리턴하는 함수.
+ */
+router.get('/api/tasks/pinup', function (req, res) {
+    db.get().collection(collectionName).find({pinup: "1"}).toArray(function (err, records) {
+        if (err) {
+            console.log(err);
+        } else {
+            res.send(JSON.stringify(records));
+        }
+    });
+});
+
 
 /**
  * 원격지원팀 주간보고용으로 만든 함수.

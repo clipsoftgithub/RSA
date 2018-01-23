@@ -68,7 +68,9 @@
             {{else}}
                 <div class="thumbnail" style="border-color:white;border-width:3px">
             {{/if}}
-                <div class="btn-group btn-group-danger" align="right">
+                <div class="caption"><h4>{{index}}</h4></div>
+                <!-- 메뉴 버튼 -->
+                <div class="btn-group btn-group-danger" align="left">
                     <button class="btn btn-danger btn-sm" type="button">메뉴</button>
                     <button data-toggle="dropdown" class="btn btn-danger btn-sm dropdown-toggle" type="button">
                         <span class="caret"></span></button>
@@ -78,6 +80,12 @@
                         <li><a href="#" task="{{_id}}" id="button-delete">삭제</a></li>
                     </ul>
                 </div>
+                <div class="btn-group" style="width:120px"></div>
+                <!-- 고정 버튼 -->
+                <div class="btn-group btn-group-danger" align="right">
+                    <button class="btn btn-danger btn-sm" type="button" task="{{_id}}" id="button-pinup">고정</button>
+                </div>
+
                 <img title="{{member}}" src="./images/{{member}}.jpeg"/>
                 <div class="caption">
                     <h4>{{project}}</h4>
@@ -94,6 +102,45 @@
         </div>
     </script>
 
+    <script id="pinup-template" type="text/x-handlebars-template">
+        <div class="col-sm-6 col-md-3">
+            {{#if tags.color}}
+                <div class="thumbnail" style="border-color:{{tags.color}};border-width:3px">
+             {{else}}
+                <div class="thumbnail" style="border-color:white;border-width:3px">
+             {{/if}}
+                    <div class="caption"><h4>{{index}}</h4></div>
+                    <div class="btn-group btn-group-danger" align="right">
+                        <button class="btn btn-danger btn-sm" type="button">메뉴</button>
+                        <button data-toggle="dropdown" class="btn btn-danger btn-sm dropdown-toggle" type="button">
+                            <span class="caret"></span></button>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" task="{{_id}}" id="button-finish">보기</a></li>
+                            <li><a href="#" task="{{_id}}" id="button-edit">편집</a></li>
+                            <li><a href="#" task="{{_id}}" id="button-delete">삭제</a></li>
+                        </ul>
+                    </div>
+                    <div class="btn-group" style="width:120px"></div>
+                    <!-- 해제 버튼 -->
+                    <div class="btn-group btn-group-danger" align="right">
+                        <button class="btn btn-danger btn-sm" type="button" task="{{_id}}" id="button-pindown">해제</button>
+                    </div>
+                    <img title="{{member}}" src="./images/{{member}}.jpeg"/>
+                    <div class="caption">
+                        <h4>{{project}}</h4>
+                        <p>{{name}}</p>
+                        <p>{{phone}}</p>
+                        <!-- https://bootsnipp.com/snippets/Q05Rv -->
+                        <span class="color" task="{{_id}}" id="button-color" color="#FFFFFF" style="background-color:#FFFFFF;cursor:pointer"></span>
+                        <span class="color" task="{{_id}}" id="button-color" color="#EF5350" style="background-color:#EF5350;cursor:pointer"></span>
+                        <span class="color" task="{{_id}}" id="button-color" color="#4DB6AC" style="background-color:#4DB6AC;cursor:pointer"></span>
+                        <span class="color" task="{{_id}}" id="button-color" color="#7986CB" style="background-color:#7986CB;cursor:pointer"></span>
+                        <span class="color" task="{{_id}}" id="button-color" color="#FFB74D" style="background-color:#FFB74D;cursor:pointer"></span>
+                    </div>
+                </div>
+         </div>
+    </script>
+
     <script type="text/javascript">
         var domain = 'http://' + window.location.host;
         function template(id, task) {
@@ -107,10 +154,12 @@
             $('#search').attr('href', domain + '/search');
             $('#statistics').attr('href', domain + '/statistics.html');
 
+            // [접수/진행/완료] 항목 구성
             $.ajax({url: domain + '/rest/api/tasks/today'}).then(function (data) {
                 var tasks = JSON.parse(data);
                 for (i = 0; i < tasks.length; ++i) {
                     var task = tasks[i];
+                    task.index = i + 1;
                     if (task.state == "접수")
                         template("#accept-template", task).appendTo('#list-accept').show();
                     else if (task.state == "진행")
@@ -159,6 +208,72 @@
                     $(location).attr('href', domain + '/assign');
                 });
 
+
+                $('[id="button-pinup"]').click(function () {
+                    var task = {};
+                    task._id = $(this).attr('task');
+                    task.pinup = "1";
+                    $.ajax({url:domain + '/rest/api/tasks', type:'PUT', data : task}).then(function(data){});
+                });
+
+
+                $('[id="button-color"]').click(function () {
+                    var color = $(this).attr("color");
+                    $(this).parent().parent().css('border-color', color);
+                    $(this).parent().parent().css('border-width', '3px');
+
+                    var task = {};
+                    task._id = $(this).attr('task');
+                    task.tags = {};
+                    task.tags.color = color;
+                    $.ajax({url:domain + '/rest/api/tasks', type:'PUT', data : task}).then(function(data){});
+
+                });
+
+            });
+
+            // [고정] 항목 구성
+            $.ajax({url: domain + '/rest/api/tasks/pinup'}).then(function (data) {
+                var tasks = JSON.parse(data);
+                for (i = 0; i < tasks.length; ++i) {
+                    var task = tasks[i];
+                    task.index = i + 1;
+                    template("#pinup-template", task).appendTo('#list-pinup').show();
+                }
+
+                // 동일한 아이디를 선택하기 위해 속성 선택자를 사용한다
+                $('[id="button-finish"]').click(function () {
+                    id = $(this).attr("task");
+                    $(location).attr('href', domain + '/finish?task=' + id);
+                });
+
+                $('[id="button-edit"]').click(function () {
+                    id = $(this).attr("task");
+                    $(location).attr('href', domain + '/edit?task=' + id);
+                });
+
+                $('[id="button-delete"]').click(function () {
+                    if (confirm('삭제한 데이터는 복구할 수 없습니다. 신중하게 생각하세요. 정말 삭제하는 것 맞나요?') == false)
+                        return;
+                    var id = $(this).attr('task');
+                    $.ajax({url:domain + '/rest/api/tasks/' + id, type:'DELETE'}).then(function(data){
+                        if(data == "ok") {
+                            alert('삭제 성공');
+                            $(location).attr('href', domain);
+                        } else {
+                            alert('삭제 실패 - 관리자에게');
+                        }
+                    });
+                });
+
+                $('[id="button-pindown"]').click(function () {
+                    var task = {};
+                    task._id = $(this).attr('task');
+                    task.pinup = "0";
+                    $.ajax({url:domain + '/rest/api/tasks', type:'PUT', data : task}).then(function(data){});
+                    $(this).parent().parent().parent().remove();
+                });
+
                 $('[id="button-color"]').click(function () {
                     var color = $(this).attr("color");
                     $(this).parent().parent().css('border-color', color);
@@ -196,6 +311,7 @@
             <li class="active"><a data-toggle="tab" href="#register">접수</a></li>
             <li><a data-toggle="tab" href="#assign">진행</a></li>
             <li><a data-toggle="tab" href="#finish">완료</a></li>
+            <li><a data-toggle="tab" href="#pinup">고정</a></li>
         </ul>
 
         <div class="tab-content">
@@ -215,6 +331,10 @@
             </div>
             <div id="finish" class="tab-pane fade">
                 <div class="row" id="list-finish">
+                </div>
+            </div>
+            <div id="pinup" class="tab-pane fade">
+                <div class="row" id="list-pinup">
                 </div>
             </div>
         </div>
