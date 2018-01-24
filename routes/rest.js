@@ -531,6 +531,127 @@ router.get('/api/tasks/statistics', function (req, res) {
 });
 
 
+
+/**
+ * 원격지원팀 차트용 만든 함수.
+ */
+router.get('/api/charts', function (req, res) {
+    var query = req.query;
+    console.log(query);
+
+    if (query == undefined)
+        query = {};
+
+    var period = 365;
+    if (query.period !== undefined) {
+        period = query.period;
+        delete query.period;
+    }
+
+    var start  = new Date(new Date() - (24 * 60 * 60 * 1000) * period);
+    var end = new Date();
+
+    start = applyTimezoneOffset(start);
+    end = applyTimezoneOffset(end);
+
+    query.create = {
+         $gte : start, $lt : end
+    };
+
+    console.log(query);
+
+    var result = {};
+
+
+    // 2018-01-09 -> 2018-1-9로 나오면서 클라이언트 소트에 영향을 줌
+    //
+    // db.get().collection(collectionName).aggregate([
+    //     {
+    //         $match: query
+    //     },
+    //     {
+    //         $group: {
+    //             _id: {
+    //                 $concat: [
+    //                     {$substr: [{$year: "$create"}, 0, 4]},
+    //                     "-",
+    //                     {$substr: [{$month: "$create"}, 0, 2]},
+    //                     "-",
+    //                     {$substr: [{$dayOfMonth: "$create"}, 0, 2]},
+    //                 ]
+    //             },
+    //             count: {
+    //                 $sum: 1
+    //             }
+    //         }
+    //     },
+    //     {
+    //         $sort : {"_id": 1}
+    //     },
+    // ]).toArray(function (err, records) {
+    //     if (err) {
+    //         console.log(err);
+    //         result.result = "error";
+    //         result.error = err;
+    //     } else {
+    //         result.result = "ok";
+    //         result.records = records;
+    //     }
+    //
+    //     if (result.records != undefined) {
+    //         result.records.forEach(function (record, index) {
+    //             record.date = record._id;
+    //             delete record._id;
+    //         });
+    //     }
+    //
+    //     console.log(records);
+    //     res.json(result);
+    // });
+
+
+    db.get().collection(collectionName).aggregate([
+        {
+            $match: query
+        },
+        {
+            $group: {
+                _id: {
+                    $dateToString: { format: "%Y-%m-%d", date: "$create" }
+                },
+                count: {
+                    $sum: 1
+                }
+            }
+        },
+        {
+            $sort : {"_id": 1}
+        },
+    ]).toArray(function (err, records) {
+        if (err) {
+            console.log(err);
+            result.result = "error";
+            result.error = err;
+        } else {
+            result.result = "ok";
+            result.records = records;
+        }
+
+        if (result.records != undefined) {
+            result.records.forEach(function (record, index) {
+                record.date = record._id;
+                delete record._id;
+            });
+        }
+
+        console.log(records);
+        res.json(result);
+    });
+
+});
+
+
+
 /**
  * 전화번호로 원격지원 작업을 검색하는 헬프 함수 - 작업 등록(register.html)에서 사용함.
  */

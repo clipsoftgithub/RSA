@@ -11,8 +11,40 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
     <script type="text/javascript">
         var domain = 'http://' + window.location.host;
+
+        function render_chart(id, result) {
+            var labels = [];
+            var data = [];
+            for (var i = 0; i < result.records.length; i++) {
+                labels.push(result.records[i].date);
+                data.push(result.records[i].count);
+            }
+            var ctx = document.getElementById(id).getContext('2d');
+            var chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '건수',
+                        data: data,
+                        borderWidth: 1
+                    }]
+                }
+            });
+        }
+
+        function refresh_chart(period) {
+            $.ajax({url:domain + '/rest/api/charts', type:'GET', data : {product:'클립리포트 4.0', period : period}}).then(function(result){
+                render_chart('chart-clipreport4.0', result);
+            });
+
+            $.ajax({url:domain + '/rest/api/charts', type:'GET', data : {product:'렉스퍼트 3.0', period : period}}).then(function(result){
+                render_chart('chart-rexpert3.0', result);
+            });
+        }
 
         $(document).ready(function () {
             $('#home').attr('href', domain);
@@ -110,7 +142,16 @@
                 search(query, '#tab-member #grid');
             });
 
+
+
+            $("[id='button-chart']").click(function () {
+                refresh_chart($(this).attr('value'));
+            });
+
+            refresh_chart(365);
+
         });
+
     </script>
 </head>
 <body>
@@ -130,7 +171,8 @@
     </div>
     <div class="row">
         <ul class="nav nav-tabs">
-            <li class="active"><a data-toggle="tab" href="#tab-company">회사</a></li>
+            <li class="active"><a data-toggle="tab" href="#tab-dashboard">대시보드</a></li>
+            <li><a data-toggle="tab" href="#tab-company">회사</a></li>
             <li><a data-toggle="tab" href="#tab-project">프로젝트</a></li>
             <li><a data-toggle="tab" href="#tab-name">이름</a></li>
             <li><a data-toggle="tab" href="#tab-phone">연락처</a></li>
@@ -139,8 +181,62 @@
         </ul>
 
         <div class="tab-content">
+            <!-- 대시보드 -->
+            <div id="tab-dashboard" class="tab-pane fade in active">
+
+                <div class="btn-group btn-group-justified" role="group" >
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-default defaultvalue" value="365" id="button-chart">1년</button>
+                    </div>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-default" value="180" id="button-chart">6개월</button>
+                    </div>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-default" value="90" id="button-chart">3개월</button>
+                    </div>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-default" value="30" id="button-chart">1개월</button>
+                    </div>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-default" value="14" id="button-chart">2주</button>
+                    </div>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-default" value="7" id="button-chart">1주</button>
+                    </div>
+                </div>
+                <div class="container">
+                    <div class="row">
+                        <div class="form-group col-sm-12">
+                            <label> </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="container">
+                    <div class="row">
+                        <div class="form-group col-sm-12">
+                            <label>클립리포트 4.0</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-12">
+                            <canvas id="chart-clipreport4.0" width="100%" height="50%"></canvas>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-12">
+                            <label>렉스퍼트 3.0</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-12">
+                            <canvas id="chart-rexpert3.0" width="100%" height="50%"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- 회사로 조회 -->
-            <div id="tab-company" class="tab-pane fade in active">
+            <div id="tab-company" class="tab-pane fade">
                 <div class="container">
                     <div class="row">
                         <div class="form-group col-sm-6">
