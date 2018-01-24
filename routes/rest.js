@@ -542,7 +542,13 @@ router.get('/api/charts', function (req, res) {
     if (query == undefined)
         query = {};
 
-    var start  = new Date(new Date() - (24 * 60 * 60 * 1000) * 30); // 7일
+    var period = 365;
+    if (query.period !== undefined) {
+        period = query.period;
+        delete query.period;
+    }
+
+    var start  = new Date(new Date() - (24 * 60 * 60 * 1000) * period);
     var end = new Date();
 
     start = applyTimezoneOffset(start);
