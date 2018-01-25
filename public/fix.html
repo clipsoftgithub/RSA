@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>클립소프트 원격지원팀 자료 일괄 수정</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid.min.css">
+    <link rel="stylesheet" href=" https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid-theme.min.css">
+    <link rel="stylesheet" href="stylesheets/style.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+        var domain = 'http://' + window.location.host;
+
+        function replace(field) {
+            var id = '#' + field;
+            var query = {};
+            query.field = field;
+            query.old = $(id).val();
+            query.new = $(id + '-new').val();
+            $.ajax({url:domain + '/rest/api/replace', type:'PUT', data : query}).then(function(result){
+                $(id).val('');
+                $(id + '-new').val('');
+                alert('변경 성공');
+            });
+        }
+
+        $(document).ready(function () {
+            $('body').on('click', '#distinct-item', function () {
+                var a = $(this).attr('target-input');
+                $(a).val($(this).attr('label'));
+            });
+
+            $('#home').attr('href', domain);
+            $('#search').attr('href', domain + '/search');
+            $('#statistics').attr('href', domain + '/statistics.html');
+
+            $.ajax({url: domain + '/rest/api/distinct/company'}).then(function (result) {
+                $.each(JSON.parse(result), function (index, value) {
+                    $('<li role="presentation"><a id="distinct-item" role="menuitem" target-input= "#company" label="' + value + '" tabindex="-1" href="#">' + value + '</a></li>').appendTo('#distinct-company');
+                })
+            });
+
+            $.ajax({url: domain + '/rest/api/distinct/project'}).then(function (result) {
+                $.each(JSON.parse(result), function (index, value) {
+                    $('<li role="presentation"><a id="distinct-item" role="menuitem" target-input= "#project" label="' + value + '" tabindex="-1" href="#">' + value + '</a></li>').appendTo('#distinct-project');
+                })
+            });
+
+            // 회사명 변경
+            $('#button-change-company').click(function() {
+                replace('company');
+            })
+
+            // 프로젝트명 변경
+            $('#button-change-project').click(function() {
+                replace('project');
+            })
+
+        });
+    </script>
+</head>
+<body>
+<div class="container">
+    <div class="jumbotron">
+        <h2>Support Team Dashboard</h2>
+        <p>Technical support may be delivered by the different technologies depending on the situation. For example,
+            direct questions can be addressed using telephone calls, SMS, Online chat, Support Forums, E-mail or Fax;
+            basic software problems can be addressed over the telephone or, increasingly, by using remote access repair
+            services; while more complicated problems with hardware may need to be dealt with in person</p>
+    </div>
+    <div class="page-header">
+        <a id="home">홈</a>
+        <a id="search">검색</a>
+        <a id="statistics">통계</a>
+        <h3>클립소프트 원격지원 자료 일괄 변경</h3>
+    </div>
+    <div class="row">
+        <ul class="nav nav-tabs">
+            <li class="active"><a data-toggle="tab" href="#tab-company">회사</a></li>
+            <li><a data-toggle="tab" href="#tab-project">프로젝트</a></li>
+        </ul>
+
+        <div class="tab-content">
+            <!-- 회사  -->
+            <div id="tab-company" class="tab-pane fade in active">
+                <div class="container">
+                    <div class="row">
+                        <div class="form-group col-sm-2">
+                            <label>선택</label>
+                            <div class="dropdown">
+                                <button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown">목록에서 선택</button>
+                                <span class="caret"></span></button>
+                                <ul id="distinct-company" class="dropdown-menu">
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="form-group col-sm-4">
+                            <label>회사명(변경전)</label>
+                            <input type="text" class="form-control" id="company" placeholder="회사명(클립소프트)을 입력해주세요.">
+                        </div>
+                        <div class="form-group col-sm-4">
+                            <label>회사명(변경후)</label>
+                            <input type="text" class="form-control" id="company-new" placeholder="회사명(클립소프트)을 입력해주세요.">
+                        </div>
+                        <div class="form-group col-sm-2">
+                            <label>&nbsp;</label>
+                            <button type="button" id="button-change-company" class="form-control btn btn-primary">변경</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 프로젝트 -->
+            <div id="tab-project" class="tab-pane fade">
+                <div class="container">
+                    <div class="row">
+                        <div class="form-group col-sm-2">
+                            <label>선택</label>
+                            <div class="dropdown">
+                                <button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown">목록에서 선택</button>
+                                <span class="caret"></span></button>
+                                <ul id="distinct-project" class="dropdown-menu">
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="form-group col-sm-4">
+                            <label>프로젝트</label>
+                            <input type="text" class="form-control" id="project" placeholder="프로젝트 이름을 입력해주세요.">
+                        </div>
+                        <div class="form-group col-sm-4">
+                            <label>프로젝트</label>
+                            <input type="text" class="form-control" id="project-new" placeholder="프로젝트 이름을 입력해주세요.">
+                        </div>
+                        <div class="form-group col-sm-2">
+                            <label>&nbsp;</label>
+                            <button type="button" id="button-change-project" class="form-control btn btn-primary">변경</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+</div>
+
+</body>
+</html>

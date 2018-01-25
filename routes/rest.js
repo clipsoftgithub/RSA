@@ -651,6 +651,41 @@ router.get('/api/charts', function (req, res) {
 });
 
 
+/**
+ * 일괄 변경 함수
+ */
+router.put('/api/replace', function (req, res) {
+    var query = req.body;
+    console.log(query);
+
+    if (query == undefined)
+        query = {};
+
+    var task_old = {};
+    var task_new = {};
+    task_old[query.field] = query.old;
+    task_new[query.field] = query.new;
+
+    // 아래 코드는 첫번째 한 레코드면 업데이트가 됨
+    // db.get().collection(collectionName).update(task_old, {$set: task_new}, {w: 1}, function (err) {
+    //     if (err) {
+    //         console.warn(err.message);
+    //     }
+    //     else {
+    //         res.send("ok");
+    //     }
+    // });
+
+    db.get().collection(collectionName).updateMany(task_old, {$set: task_new}, function (err) {
+        if (err) {
+            console.warn(err.message);
+        }
+        else {
+            res.send("ok");
+        }
+    });
+
+});
 
 /**
  * 전화번호로 원격지원 작업을 검색하는 헬프 함수 - 작업 등록(register.html)에서 사용함.
