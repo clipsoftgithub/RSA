@@ -14,22 +14,40 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
     <script type="text/javascript">
         var domain = 'http://' + window.location.host;
-
-        function render_chart(id, result) {
+        function chart_render(id, data40, data30) {
             var labels = [];
-            var data = [];
-            for (var i = 0; i < result.records.length; i++) {
-                labels.push(result.records[i].date);
-                data.push(result.records[i].count);
+            var data1 = [];
+            for (var i = 0; i < data40.records.length; i++) {
+                labels.push(data40.records[i].date);
+                data1.push(data40.records[i].count);
             }
-            var ctx = document.getElementById(id).getContext('2d');
+
+            var data2 = [];
+            for (var i = 0; i < data30.records.length; i++) {
+                data2.push(data30.records[i].count);
+            }
+
+            $('#chart').remove();
+            $('<canvas/>', {'id': 'chart'}).appendTo('#chart-container');
+
+            var ctx = $('#chart')[0].getContext('2d');
             var chart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: '건수',
-                        data: data,
+                        label: '클립리포트 4.0',
+                        fill : false,
+                        backgroundColor: "rgb(255, 99, 132)",
+                        borderColor: "rgb(255, 99, 132)",
+                        data: data1,
+                        borderWidth: 1
+                    }, {
+                        label: '렉스퍼트 3.0',
+                        fill: false,
+                        backgroundColor: "rgb(54, 162, 235)",
+                        borderColor: "rgb(54, 162, 235)",
+                        data: data2,
                         borderWidth: 1
                     }]
                 }
@@ -37,13 +55,19 @@
         }
 
         function refresh_chart(period) {
-            $.ajax({url:domain + '/rest/api/charts', type:'GET', data : {product:'클립리포트 4.0', period : period}}).then(function(result){
-                render_chart('chart-clipreport4.0', result);
+            var data40 = {};
+            var data30 = {};
+            var param = {url:domain + '/rest/api/charts', async: false, type:'GET', data : {product:'클립리포트 4.0', period : period}};
+
+            $.ajax(param).then(function(result){
+                data40 = result;
+            });
+            param.data.product = '렉스퍼트 3.0';
+            $.ajax(param).then(function(result){
+                data30 = result;
             });
 
-            $.ajax({url:domain + '/rest/api/charts', type:'GET', data : {product:'렉스퍼트 3.0', period : period}}).then(function(result){
-                render_chart('chart-rexpert3.0', result);
-            });
+            chart_render('chart-container', data40, data30);
         }
 
         $(document).ready(function () {
@@ -214,22 +238,14 @@
                 <div class="container">
                     <div class="row">
                         <div class="form-group col-sm-12">
-                            <label>클립리포트 4.0</label>
+                            <label>클립리포트 4.0 / 렉스퍼트 3.0</label>
                         </div>
                     </div>
                     <div class="row">
                         <div class="form-group col-sm-12">
-                            <canvas id="chart-clipreport4.0" width="100%" height="50%"></canvas>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-sm-12">
-                            <label>렉스퍼트 3.0</label>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-sm-12">
-                            <canvas id="chart-rexpert3.0" width="100%" height="50%"></canvas>
+                            <div id="chart-container" width="100%" height="50%">
+
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -761,9 +761,11 @@ router.get('/api/distinct/project', function (req, res) {
             console.log(err);
         } else {
             records.sort();
+            console.log(records);
             res.send(JSON.stringify(records));
         }
     });
+
 });
 
 /**
