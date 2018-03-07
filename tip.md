@@ -94,3 +94,8 @@ mongodump --out ~/clipsoft/RSAMongobackup/20180123
 ## update 
 forever stop 0
 forever start ./bin/www
+
+
+
+## json2csv
+npm install json2csv --save

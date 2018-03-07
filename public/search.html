@@ -56,6 +56,11 @@
             }
 
 
+            function exportcsv(query, grid_id) {
+                $.ajax({url: domain + '/rest/api/tasks/export', data: query, dataType: "json"}).then(function (result) {
+                });
+            }
+
             function search_weekly_report(query, grid_id) {
                 $.ajax({url: domain + '/rest/api/tasks/search/weekly', data: query, dataType: "json"}).then(function (result) {
                     $(grid_id).jsGrid({
@@ -125,6 +130,24 @@
                 query.end = end;
                 search(query, '#tab-company #grid');
             });
+
+
+            // 회사로 CSV 저장하는 경우
+            $('#tab-company #export').click(function () {
+                var company = $('#company').val();
+                var start = $('#tab-company #start').val();
+                var end = $('#tab-company #end').val();
+                if (company == "" || company == undefined) {
+                    $('#company').closest('.form-group').removeClass('has-success').addClass('has-error');
+                    return;
+                }
+                var query = {};
+                query.company = company;
+                query.start = start;
+                query.end = end;
+                exportcsv(query, '#tab-company #grid');
+            });
+
 
             // 프로젝트로 검색하는 경우
             $('#tab-project #search').click(function () {
@@ -318,9 +341,14 @@
                             <label>회사명</label>
                             <input type="text" class="form-control" id="company" placeholder="회사명(클립소프트)을 입력해주세요.">
                         </div>
-                        <div class="form-group col-sm-6">
+                        <div class="form-group col-sm-3">
                             <label>&nbsp;</label>
                             <button type="button" id="search" class="form-control btn btn-primary">조회
+                            </button>
+                        </div>
+                        <div class="form-group col-sm-3">
+                            <label>&nbsp;</label>
+                            <button type="button" id="export" class="form-control btn btn-primary">저장
                             </button>
                         </div>
                     </div>
