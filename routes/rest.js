@@ -3,7 +3,7 @@ var db = require('../db');
 var router = express.Router();
 var ObjectID = require('mongodb').ObjectID;
 var collectionName = 'support_team';
-
+var json2csv = require('json2csv').parse;
 
 function applyTimezoneOffset(date) {
     date.setHours((date.getHours() - date.getTimezoneOffset() / 60));
@@ -181,6 +181,103 @@ router.get('/api/tasks/search', function (req, res) {
             result.records = records;
         }
         res.json(result);
+    });
+});
+
+
+
+/**
+ * 원격지원 작업을 CSV로 저장하는 함수.
+ */
+router.get('/api/tasks/export', function (req, res) {
+
+    console.log("====================");
+    var query = req.query;
+    console.log(query);
+
+    if (query == undefined)
+        query = {};
+
+    //
+    // 지원 날짜로 검색하는 경우 달리 처리하도록 함
+    //
+    if (query.type !== undefined && query.type === "day") {
+        var start = new Date(query.start);
+        var end = new Date(query.start);
+        start.setHours(0, 0, 0, 0);
+        end.setHours(23, 59, 59, 999);
+        query = {create: {$gte: start, $lt: end}};
+    } else {
+        var start = new Date(query.start || "");
+        var end = new Date(query.end || "");
+        if (query.start != "" && query.end != "") {
+            start.setHours(0, 0, 0, 0);
+            end.setHours(23, 59, 59, 999);
+            query.create = {$gte: start, $lt: end};
+        } else if (query.start != "") {
+            start.setHours(0, 0, 0, 0);
+            query.create = {$gte: start};
+        } else if (query.end != "") {
+            end.setHours(23, 59, 59, 999);
+            query.create = {$lt: end};
+        }
+        delete query.start;
+        delete query.end;
+    }
+
+    // 쿼리에 포함된 날짜를 타임존을 적용하여 변경한다.
+    if (query.create != undefined && query.create.$gte != undefined)
+        query.create.$gte = applyTimezoneOffset(query.create.$gte);
+
+    if (query.create != undefined && query.create.$lt != undefined)
+        query.create.$lt = applyTimezoneOffset(query.create.$lt);
+
+
+    if (query.content != undefined && query.content != "") {
+        query.result = {$regex : query.content};
+        delete query.content;
+    }
+
+    console.log(query);
+
+    var result = {};
+
+    db.get().collection(collectionName).find(query).toArray(function (err, records) {
+        if (err) {
+            console.log(err);
+            result.result = "error";
+            result.error = err;
+        } else {
+            result.result = "ok";
+            result.records = records;
+        }
+        //console.log(result);
+
+        try {
+            var csv = "";
+            for (var i = 0; i < result.records.length; i++) {
+                var record = result.records[i];
+                for (var name in record) {
+                    //var value = record[name];
+                    var value = record[name].toString();
+                    value = value.replace(/,/g, " ");
+                    value = value.replace(/\r/g, "\t");
+                    value = value.replace(/\n/g, "\t");
+                    csv += value;
+
+                    csv += ",";
+                }
+                csv += "끝";
+                csv += "\r\n";
+            }
+            console.log(csv);
+            res.setHeader('Content-disposition', 'attachment; filename=data.csv');
+            res.set('Content-Type', 'text/csv');
+            res.status(200).send(csv);
+        } catch (err) {
+            console.error(err);
+        }
+
     });
 });
 
