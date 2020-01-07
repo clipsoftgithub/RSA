@@ -264,14 +264,13 @@ router.get('/api/tasks/export', function (req, res) {
                     value = value.replace(/\r/g, "\t");
                     value = value.replace(/\n/g, "\t");
                     csv += value;
-
                     csv += ",";
                 }
-                csv += "끝";
+                csv += "";
                 csv += "\r\n";
             }
             console.log(csv);
-            res.setHeader('Content-disposition', 'attachment; filename=data.csv');
+            res.setHeader('Content-Disposition', 'attachment; filename=\"' + 'download-' + Date.now() + '.csv\"');
             res.set('Content-Type', 'text/csv');
             res.status(200).send(csv);
         } catch (err) {

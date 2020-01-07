@@ -109,9 +109,19 @@
             // 날짜로 검색하는 경우
             $('#tab-date #search').click(function () {
                 var query = {};
-                query.type = "day";
+                //query.type = "day";
                 query.start = $('#tab-date #start').val();
+                query.end = $('#tab-date #end').val();
                 search(query, '#tab-date #grid');
+            });
+
+            // 날짜로 CSV 저장하는 경우
+            $('#tab-date #export').click(function () {
+                var query = "";
+                query += "start=" + $('#tab-date #start').val();
+                query += "&";
+                query += "end=" + $('#tab-date #end').val();
+                window.open(domain + '/rest/api/tasks/export?' + query, '_self');
             });
 
 
@@ -141,11 +151,15 @@
                     $('#company').closest('.form-group').removeClass('has-success').addClass('has-error');
                     return;
                 }
-                var query = {};
-                query.company = company;
-                query.start = start;
-                query.end = end;
-                exportcsv(query, '#tab-company #grid');
+
+                var query = "";
+                query += "company=" + company;
+                query += "&";
+                query += "start=" + start;
+                query += "&";
+                query += "end=" + end;
+                window.open(domain + '/rest/api/tasks/export?' + query, '_self');
+
             });
 
 
@@ -296,15 +310,28 @@
             <!-- 날짜로 조회 -->
             <div id="tab-date" class="tab-pane fade in active">
                 <div class="container">
-                    <div class="row">
+                   <div class="row">
                         <div class="form-group col-sm-6">
-                            <label>날짜</label>
+                            <label>시작</label>
                             <input type="date" data-date="" data-date-format="YYYY-MM-DD" class="form-control"
                                    id="start" placeholder="날짜(2017-01-01)입력해주세요.">
                         </div>
+                       <div class="form-group col-sm-6">
+                           <label>종료</label>
+                           <input type="date" data-date="" data-date-format="YYYY-MM-DD" class="form-control"
+                                  id="end" placeholder="날짜(2017-01-01)입력해주세요.">
+                       </div>
+                    </div>
+                    <div class="row">
                         <div class="form-group col-sm-6">
+                        </div>
+                        <div class="form-group col-sm-3">
                             <label>&nbsp;</label>
                             <button type="button" id="search" class="form-control btn btn-primary">조회</button>
+                        </div>
+                        <div class="form-group col-sm-3">
+                            <label>&nbsp;</label>
+                            <button type="button" id="export" class="form-control btn btn-primary">저장</button>
                         </div>
                     </div>
                     <div id="grid" class="row">
@@ -491,6 +518,7 @@
                                 <option>렉스퍼트 2.5</option>
                                 <option>렉스퍼트 3.0</option>
                                 <option selected>클립리포트 4.0</option>
+                                <option>클립리포트 5.0</option>
                                 <option>클립리포트 4.0 데몬</option>
                                 <option>웹이폼</option>
                             </select>
