@@ -4,6 +4,7 @@ var router = express.Router();
 var ObjectID = require('mongodb').ObjectID;
 var collectionName = 'support_team';
 var json2csv = require('json2csv').parse;
+var moment = require('moment')
 
 function applyTimezoneOffset(date) {
     date.setHours((date.getHours() - date.getTimezoneOffset() / 60));
@@ -258,8 +259,14 @@ router.get('/api/tasks/export', function (req, res) {
             for (var i = 0; i < result.records.length; i++) {
                 var record = result.records[i];
                 for (var name in record) {
-                    //var value = record[name];
-                    var value = record[name].toString();
+                    var value = record[name];
+                    if (name == "create") {
+                        value = moment(value).format("YYYY-MM-DD");
+                    } else if (name == "btime" || name == "etime") {
+                        value = moment(value).format("YYYY-MM-DD HH:MM:SS");
+                    } else {
+                        value = value.toString();
+                    }
                     value = value.replace(/,/g, " ");
                     value = value.replace(/\r/g, "\t");
                     value = value.replace(/\n/g, "\t");
